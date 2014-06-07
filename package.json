@@ -1,0 +1,8 @@
+{
+  "name" : "TravelLog",
+  "version" : "0.0.1",
+  "dependencies" : {
+    "coffee-script": "1.7.1",
+    "easyimage" : "0.1.6"
+  }
+}

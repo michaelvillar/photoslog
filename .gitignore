@@ -1,0 +1,3 @@
+data/*
+public/data/*/*
+node_modules
