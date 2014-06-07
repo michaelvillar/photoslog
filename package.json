@@ -2,7 +2,9 @@
   "name" : "TravelLog",
   "version" : "0.0.1",
   "dependencies" : {
-    "coffee-script": "1.7.1",
-    "easyimage" : "0.1.6"
+    "coffee-script": "1.x.x",
+    "easyimage" : "0.1.x",
+    "connect" : "2.x.x",
+    "mincer" : "1.x.x",
   }
 }
