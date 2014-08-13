@@ -5,7 +5,7 @@ class PhotosGroupView extends View
 
   render: =>
     pixelRatio = window.devicePixelRatio ? 1
-    suffix = if pixelRatio == 1 then '' else "@#{pixelRatio}x"
+    ratio = "#{pixelRatio}x"
     i = 0
     for travelImage in @options.group.images
       image = document.createElement('div')
@@ -14,14 +14,8 @@ class PhotosGroupView extends View
       if travelImage.type == 'row'
         rowsLength = (@options.group.images.length - 1)
         image.style.width = "calc((100% - #{7 * (rowsLength - 1)}px) / #{rowsLength})"
-      # else
-        # image.style.width = @options.group.images.length - 1
 
-      args = travelImage.file.split('.')
-      filename = args[0]
-      extension = "." + args[1]
-
-      image.style.backgroundImage = "url(" + ["/data", @options.group.path, filename + "_timeline" + suffix + extension].join('/') + ")";
+      image.style.backgroundImage = "url(" + ["/data", @options.group.path, travelImage.files[ratio]].join('/') + ")";
       @el.appendChild(image)
       i += 1
 

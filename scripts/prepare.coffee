@@ -86,7 +86,11 @@ createTimeline = (groups) ->
         for i in [0..Math.min(2, images.length - 1)]
           image = images[i]
           group.images.push(image)
-          processTimelineImage(group, image)
+          do (image) ->
+            processTimelineImage(group, image).then((filenames) ->
+              delete image.file
+              image.files = _.merge.apply(this, filenames)
+            )
   ).then(->
     console.log "Writing #{DST + "info.json"}"
     fs.write(DST + "info.json", JSON.stringify(json))
@@ -104,7 +108,7 @@ processTimelineImage = (group, image) ->
 resizeImage = (file, dstPath, opts = {}, others = {}) =>
   Q.all do ->
     for ratio in [1, 2]
-      do ->
+      do (ratio) ->
         others.suffix ?= ''
         options = clone(opts)
         suffix = if ratio == 1 then '' else "@#{ratio}x"
@@ -130,6 +134,10 @@ resizeImage = (file, dstPath, opts = {}, others = {}) =>
         .then((exists) ->
           return if exists
           easyimage.resize(options)
+        ).then(->
+          r = {}
+          r["#{ratio}x"] = suffixedFilename
+          r
         )
 
 start()

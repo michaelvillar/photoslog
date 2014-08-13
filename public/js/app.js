@@ -355,9 +355,9 @@ PhotosGroupView = (function(_super) {
   PhotosGroupView.prototype.className = 'photosGroupView';
 
   PhotosGroupView.prototype.render = function() {
-    var args, extension, filename, i, image, pixelRatio, rowsLength, suffix, travelImage, _i, _len, _ref, _ref1, _results;
+    var i, image, pixelRatio, ratio, rowsLength, travelImage, _i, _len, _ref, _ref1, _results;
     pixelRatio = (_ref = window.devicePixelRatio) != null ? _ref : 1;
-    suffix = pixelRatio === 1 ? '' : "@" + pixelRatio + "x";
+    ratio = "" + pixelRatio + "x";
     i = 0;
     _ref1 = this.options.group.images;
     _results = [];
@@ -370,10 +370,7 @@ PhotosGroupView = (function(_super) {
         rowsLength = this.options.group.images.length - 1;
         image.style.width = "calc((100% - " + (7 * (rowsLength - 1)) + "px) / " + rowsLength + ")";
       }
-      args = travelImage.file.split('.');
-      filename = args[0];
-      extension = "." + args[1];
-      image.style.backgroundImage = "url(" + ["/data", this.options.group.path, filename + "_timeline" + suffix + extension].join('/') + ")";
+      image.style.backgroundImage = "url(" + ["/data", this.options.group.path, travelImage.files[ratio]].join('/') + ")";
       this.el.appendChild(image);
       _results.push(i += 1);
     }
