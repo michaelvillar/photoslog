@@ -11,7 +11,9 @@ class PhotosGroupView extends View
     @appendRowImages(@options.group.images[1..@options.group.images.length - 1])
 
   appendFullImage: (image) =>
-    @el.appendChild(@createImage(image))
+    img = @createImage(image)
+    img.style.height = "#{image.size.height}px"
+    @el.appendChild(img)
 
   appendRowImages: (images) =>
     margins = (images.length - 1) * 7
