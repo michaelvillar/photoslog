@@ -6,7 +6,7 @@ Mincer = require('mincer')
 environment = new Mincer.Environment()
 environment.appendPath('src/app')
 
-class PostProcessor
+class JSPostProcessor
   constructor: (@path, @data) ->
 
   evaluate: (context, locals) =>
@@ -19,7 +19,7 @@ class PostProcessor
     data += '}});'
     return data
 
-environment.registerPostProcessor('application/javascript', PostProcessor)
+environment.registerPostProcessor('application/javascript', JSPostProcessor)
 
 commonjsData = fs.readFileSync('scripts/data/commonjs.nomodule.js')
 
@@ -27,6 +27,10 @@ setInterval ->
   try
     asset = environment.findAsset('app.nomodule.coffee')
     fs.writeFile "public/js/app.js", commonjsData + asset.toString()
+    console.log 'Compiled app.js'
+    asset = environment.findAsset('app.styl')
+    fs.writeFile "public/css/app.css", asset.toString()
+    console.log 'Compiled app.css'
   catch e
     console.log e
 , 1000

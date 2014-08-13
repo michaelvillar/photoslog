@@ -235,6 +235,15 @@ View = (function(_super) {
       this.el.classList.add(className);
     }
     this.subviews = [];
+    if (typeof this.render === "function") {
+      this.render();
+    }
+    if (typeof this.bindEvents === "function") {
+      this.bindEvents();
+    }
+    if (typeof this.layout === "function") {
+      this.layout();
+    }
   }
 
   View.prototype.addSubview = function(subview) {
@@ -259,13 +268,31 @@ View = (function(_super) {
 
 })(EventDispatcher);
 
-module.exports = View;}});this.require.define({ "app" : function(exports, require, module) {var App, Controller, View,
+module.exports = View;}});this.require.define({ "get" : function(exports, require, module) {var get;
+
+get = function(path, callback) {
+  var httpRequest;
+  httpRequest = new XMLHttpRequest();
+  httpRequest.onreadystatechange = function() {
+    if (httpRequest.readyState === 4 && httpRequest.status === 200) {
+      return typeof callback === "function" ? callback(JSON.parse(httpRequest.responseText)) : void 0;
+    }
+  };
+  httpRequest.open('GET', path);
+  return httpRequest.send();
+};
+
+module.exports = get;}});this.require.define({ "app" : function(exports, require, module) {var App, Controller, Timeline, View, get,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Controller = require('controller');
 
 View = require('view');
+
+Timeline = require('timeline');
+
+get = require('get');
 
 App = (function(_super) {
   __extends(App, _super);
@@ -275,11 +302,122 @@ App = (function(_super) {
     this.view = new View({
       el: document.body
     });
+    this.timeline = new Timeline;
+    this.view.addSubview(this.timeline.view);
   }
 
   return App;
 
 })(Controller);
 
-module.exports = App;}});
+module.exports = App;}});this.require.define({ "timeline" : function(exports, require, module) {var Controller, Timeline, TimelineView, get,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Controller = require('controller');
+
+TimelineView = require('timelineView');
+
+get = require('get');
+
+Timeline = (function(_super) {
+  __extends(Timeline, _super);
+
+  function Timeline() {
+    Timeline.__super__.constructor.apply(this, arguments);
+    this.view = new TimelineView;
+    get('/data/photos.json', (function(_this) {
+      return function(data) {
+        return _this.view.setTravels(data.travels);
+      };
+    })(this));
+  }
+
+  return Timeline;
+
+})(Controller);
+
+module.exports = Timeline;}});this.require.define({ "timelineView" : function(exports, require, module) {var TimelineView, TravelView, View,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+View = require('view');
+
+TravelView = require('travelView');
+
+TimelineView = (function(_super) {
+  __extends(TimelineView, _super);
+
+  function TimelineView() {
+    this.setTravels = __bind(this.setTravels, this);
+    return TimelineView.__super__.constructor.apply(this, arguments);
+  }
+
+  TimelineView.prototype.className = 'timelineView';
+
+  TimelineView.prototype.setTravels = function(travels) {
+    var travel, travelView, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = travels.length; _i < _len; _i++) {
+      travel = travels[_i];
+      travelView = new TravelView({
+        travel: travel
+      });
+      _results.push(this.addSubview(travelView));
+    }
+    return _results;
+  };
+
+  return TimelineView;
+
+})(View);
+
+module.exports = TimelineView;}});this.require.define({ "travelView" : function(exports, require, module) {var TravelView, View,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+View = require('view');
+
+TravelView = (function(_super) {
+  __extends(TravelView, _super);
+
+  function TravelView() {
+    this.render = __bind(this.render, this);
+    return TravelView.__super__.constructor.apply(this, arguments);
+  }
+
+  TravelView.prototype.className = 'travelView';
+
+  TravelView.prototype.render = function() {
+    var args, extension, filename, i, image, pixelRatio, suffix, travelImage, _i, _len, _ref, _ref1, _results;
+    pixelRatio = (_ref = window.devicePixelRatio) != null ? _ref : 1;
+    suffix = pixelRatio === 1 ? '' : "@" + pixelRatio + "x";
+    i = 0;
+    _ref1 = this.options.travel.images;
+    _results = [];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      travelImage = _ref1[_i];
+      image = document.createElement('div');
+      image.classList.add('image');
+      image.classList.add(travelImage.type);
+      if (travelImage.type === 'row') {
+        image.style.width = Math.round(100 / (this.options.travel.images.length - 1)) + "%";
+      }
+      args = travelImage.file.split('.');
+      filename = args[0];
+      extension = "." + args[1];
+      image.style.backgroundImage = "url(" + ["/data", this.options.travel.path, filename + "_timeline" + suffix + extension].join('/') + ")";
+      this.el.appendChild(image);
+      _results.push(i += 1);
+    }
+    return _results;
+  };
+
+  return TravelView;
+
+})(View);
+
+module.exports = TravelView;}});
 ;

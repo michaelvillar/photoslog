@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+.timelineView {
+  margin: 0 auto;
+  width: 380px;
+}
+.timelineView > .travelView {
+  margin: 50px 0;
+}
+.travelView {
+  width: 380px;
+  line-height: 0;
+}
+.travelView > .image {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+.travelView > .image.full {
+  width: 380px;
+  height: 253px;
+}
+.travelView > .image.row {
+  height: 126px;
+}

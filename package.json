@@ -1,10 +1,11 @@
 {
-  "name" : "TravelLog",
+  "name" : "PhotoLog",
   "version" : "0.0.1",
   "dependencies" : {
     "coffee-script": "1.x.x",
     "easyimage" : "0.1.x",
     "connect" : "2.x.x",
     "mincer" : "1.x.x",
+    "stylus": "0.x.x"
   }
 }

@@ -7,28 +7,6 @@ BASE = './'
 SRC =  "#{BASE}data/"
 DST = "#{BASE}public/data/"
 
-fs.readdir SRC, (err, dirs) ->
-  if err?
-    return console.log err
-
-  for dir in dirs
-    continue if dir == '.DS_Store'
-    fullDir = SRC + dir + "/"
-    dstDir = DST + dir + "/"
-    fs.readdir fullDir, (err, files) ->
-      return if err?
-      fs.mkdir dstDir, ->
-        for file in files
-          continue if file == '.DS_Store'
-          if file == 'info.json'
-            info = new Info(fullDir, file)
-            info.write(dstDir)
-          else
-            image = new Image(fullDir, file)
-            image.resize(dstDir, {
-              width: 200
-            })
-
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
 
@@ -62,30 +40,70 @@ imagesQueue = new Queue
 
 class File
   constructor: (path, filename) ->
-    @path = path
-    @filename = filename
-    @filepath = @path + @filename
+    @_path = path
+    @_filename = filename
+    @_filepath = @_path + @_filename
 
-class Info extends File
+class TimelineFile extends File
+  constructor: ->
+    super
+    @travels = []
+
+  addTravel: (travel) =>
+    @travels.push {
+      name: travel.name(),
+      path: travel.path(),
+      images: travel.timelineImages()
+    }
+
   write: (dstPath) =>
-    fs.writeFile dstPath + "info.json", ""
+    fs.writeFile dstPath + "photos.json", JSON.stringify({ travels: @travels })
 
-class Image extends File
-  resize: (dstPath, opts = {}) =>
+class TravelFile extends File
+  constructor: ->
+    super
+
+    @json = JSON.parse(fs.readFileSync(@_filepath))
+
+  name: =>
+    @json.name
+
+  path: =>
+    args = @_path.trim().split('/')
+    i = args.length - 1
+    while i > 0
+      return args[i] if args[i] != ''
+      i -= 1
+    ''
+
+  timelineImages: =>
+    images = []
+    for i in [0..2]
+      break if i >= @json.images.length
+      image = @json.images[i]
+      images.push image
+    images
+
+  write: (dstPath) =>
+    fs.writeFile dstPath + "info.json", JSON.stringify(@json)
+
+class ImageFile extends File
+  resize: (dstPath, opts = {}, others = {}) =>
     for ratio in [1, 2]
       do =>
+        others.suffix ?= ''
         options = clone(opts)
         suffix = if ratio == 1 then '' else "@#{ratio}x"
-        filenameArgs = @filename.split('.')
+        filenameArgs = @_filename.split('.')
         suffixedFilename = ''
         for i, arg of filenameArgs
           if parseInt(i) == filenameArgs.length - 1
-            suffixedFilename += suffix
+            suffixedFilename += others.suffix + suffix
           if i > 0
             suffixedFilename += '.'
           suffixedFilename += arg
 
-        options.src = @filepath
+        options.src = @_filepath
         options.dst = dstPath + suffixedFilename
         options.quality = 95
         for key in ['width', 'height', 'cropwidth', 'cropheight', 'x', 'y']
@@ -100,3 +118,28 @@ class Image extends File
               else
                 console.log "Generated #{image.name.trim()}"
               fn()
+
+timelineFile = new TimelineFile
+
+dirs = fs.readdirSync SRC
+for dir in dirs
+  continue if dir == '.DS_Store'
+  fullDir = SRC + dir + "/"
+  dstDir = DST + dir + "/"
+  files = fs.readdirSync fullDir
+  fs.mkdirSync dstDir unless fs.existsSync dstDir
+  for file in files
+    continue if file == '.DS_Store'
+    if file == 'info.json'
+      travelFile = new TravelFile(fullDir, file)
+      timelineFile.addTravel(travelFile)
+      travelFile.write(dstDir)
+    else
+      imageFile = new ImageFile(fullDir, file)
+      imageFile.resize(dstDir, {
+        width: 380
+      }, {
+        suffix: '_timeline'
+      })
+
+timelineFile.write(DST)

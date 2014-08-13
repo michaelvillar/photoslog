@@ -12,6 +12,10 @@ class View extends EventDispatcher
 
     @subviews = []
 
+    @render?()
+    @bindEvents?()
+    @layout?()
+
   addSubview: (subview) =>
     @el.appendChild(subview.el)
     @subviews.push(subview)
