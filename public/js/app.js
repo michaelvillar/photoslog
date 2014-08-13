@@ -328,7 +328,7 @@ Timeline = (function(_super) {
     this.view = new TimelineView;
     get('/data/photos.json', (function(_this) {
       return function(data) {
-        return _this.view.setTravels(data.travels);
+        return _this.view.setPhotos(data.groups);
       };
     })(this));
   }
@@ -337,34 +337,80 @@ Timeline = (function(_super) {
 
 })(Controller);
 
-module.exports = Timeline;}});this.require.define({ "timelineView" : function(exports, require, module) {var TimelineView, TravelView, View,
+module.exports = Timeline;}});this.require.define({ "photosGroupView" : function(exports, require, module) {var PhotosGroupView, View,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 View = require('view');
 
-TravelView = require('travelView');
+PhotosGroupView = (function(_super) {
+  __extends(PhotosGroupView, _super);
+
+  function PhotosGroupView() {
+    this.render = __bind(this.render, this);
+    return PhotosGroupView.__super__.constructor.apply(this, arguments);
+  }
+
+  PhotosGroupView.prototype.className = 'photosGroupView';
+
+  PhotosGroupView.prototype.render = function() {
+    var args, extension, filename, i, image, pixelRatio, suffix, travelImage, _i, _len, _ref, _ref1, _results;
+    pixelRatio = (_ref = window.devicePixelRatio) != null ? _ref : 1;
+    suffix = pixelRatio === 1 ? '' : "@" + pixelRatio + "x";
+    i = 0;
+    _ref1 = this.options.group.images;
+    _results = [];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      travelImage = _ref1[_i];
+      image = document.createElement('div');
+      image.classList.add('image');
+      image.classList.add(travelImage.type);
+      if (travelImage.type === 'row') {
+        image.style.width = Math.round(100 / (this.options.group.images.length - 1)) + "%";
+      }
+      args = travelImage.file.split('.');
+      filename = args[0];
+      extension = "." + args[1];
+      image.style.backgroundImage = "url(" + ["/data", this.options.group.path, filename + "_timeline" + suffix + extension].join('/') + ")";
+      this.el.appendChild(image);
+      _results.push(i += 1);
+    }
+    return _results;
+  };
+
+  return PhotosGroupView;
+
+})(View);
+
+module.exports = PhotosGroupView;}});this.require.define({ "timelineView" : function(exports, require, module) {var PhotosGroupView, TimelineView, View,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+View = require('view');
+
+PhotosGroupView = require('photosGroupView');
 
 TimelineView = (function(_super) {
   __extends(TimelineView, _super);
 
   function TimelineView() {
-    this.setTravels = __bind(this.setTravels, this);
+    this.setPhotos = __bind(this.setPhotos, this);
     return TimelineView.__super__.constructor.apply(this, arguments);
   }
 
   TimelineView.prototype.className = 'timelineView';
 
-  TimelineView.prototype.setTravels = function(travels) {
-    var travel, travelView, _i, _len, _results;
+  TimelineView.prototype.setPhotos = function(groups) {
+    var group, photosGroupView, _i, _len, _results;
     _results = [];
-    for (_i = 0, _len = travels.length; _i < _len; _i++) {
-      travel = travels[_i];
-      travelView = new TravelView({
-        travel: travel
+    for (_i = 0, _len = groups.length; _i < _len; _i++) {
+      group = groups[_i];
+      photosGroupView = new PhotosGroupView({
+        group: group
       });
-      _results.push(this.addSubview(travelView));
+      _results.push(this.addSubview(photosGroupView));
     }
     return _results;
   };
@@ -373,51 +419,5 @@ TimelineView = (function(_super) {
 
 })(View);
 
-module.exports = TimelineView;}});this.require.define({ "travelView" : function(exports, require, module) {var TravelView, View,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-View = require('view');
-
-TravelView = (function(_super) {
-  __extends(TravelView, _super);
-
-  function TravelView() {
-    this.render = __bind(this.render, this);
-    return TravelView.__super__.constructor.apply(this, arguments);
-  }
-
-  TravelView.prototype.className = 'travelView';
-
-  TravelView.prototype.render = function() {
-    var args, extension, filename, i, image, pixelRatio, suffix, travelImage, _i, _len, _ref, _ref1, _results;
-    pixelRatio = (_ref = window.devicePixelRatio) != null ? _ref : 1;
-    suffix = pixelRatio === 1 ? '' : "@" + pixelRatio + "x";
-    i = 0;
-    _ref1 = this.options.travel.images;
-    _results = [];
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      travelImage = _ref1[_i];
-      image = document.createElement('div');
-      image.classList.add('image');
-      image.classList.add(travelImage.type);
-      if (travelImage.type === 'row') {
-        image.style.width = Math.round(100 / (this.options.travel.images.length - 1)) + "%";
-      }
-      args = travelImage.file.split('.');
-      filename = args[0];
-      extension = "." + args[1];
-      image.style.backgroundImage = "url(" + ["/data", this.options.travel.path, filename + "_timeline" + suffix + extension].join('/') + ")";
-      this.el.appendChild(image);
-      _results.push(i += 1);
-    }
-    return _results;
-  };
-
-  return TravelView;
-
-})(View);
-
-module.exports = TravelView;}});
+module.exports = TimelineView;}});
 ;

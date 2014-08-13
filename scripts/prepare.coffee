@@ -47,19 +47,19 @@ class File
 class TimelineFile extends File
   constructor: ->
     super
-    @travels = []
+    @groups = []
 
-  addTravel: (travel) =>
-    @travels.push {
-      name: travel.name(),
-      path: travel.path(),
-      images: travel.timelineImages()
+  addGroup: (group) =>
+    @groups.push {
+      name: group.name(),
+      path: group.path(),
+      images: group.timelineImages()
     }
 
   write: (dstPath) =>
-    fs.writeFile dstPath + "photos.json", JSON.stringify({ travels: @travels })
+    fs.writeFile dstPath + "photos.json", JSON.stringify({ groups: @groups })
 
-class TravelFile extends File
+class InfoFile extends File
   constructor: ->
     super
 
@@ -131,9 +131,9 @@ for dir in dirs
   for file in files
     continue if file == '.DS_Store'
     if file == 'info.json'
-      travelFile = new TravelFile(fullDir, file)
-      timelineFile.addTravel(travelFile)
-      travelFile.write(dstDir)
+      infoFile = new InfoFile(fullDir, file)
+      timelineFile.addGroup(infoFile)
+      infoFile.write(dstDir)
     else
       imageFile = new ImageFile(fullDir, file)
       imageFile.resize(dstDir, {
