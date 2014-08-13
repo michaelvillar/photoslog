@@ -15,9 +15,14 @@
 .photosGroupView > .image.full {
   width: 380px;
   height: 253px;
+  margin-bottom: 7px;
 }
 .photosGroupView > .image.row {
   height: 126px;
+  margin-bottom: 7px;
+}
+.photosGroupView > .image.row:not(:last-child) {
+  margin-right: 7px;
 }
 .timelineView {
   margin: 0 auto;

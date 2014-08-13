@@ -12,7 +12,8 @@ class PhotosGroupView extends View
       image.classList.add('image')
       image.classList.add(travelImage.type)
       if travelImage.type == 'row'
-        image.style.width = Math.round(100 / (@options.group.images.length - 1)) + "%"
+        rowsLength = (@options.group.images.length - 1)
+        image.style.width = "calc((100% - #{7 * (rowsLength - 1)}px) / #{rowsLength})"
       # else
         # image.style.width = @options.group.images.length - 1
 

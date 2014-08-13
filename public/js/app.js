@@ -326,7 +326,7 @@ Timeline = (function(_super) {
   function Timeline() {
     Timeline.__super__.constructor.apply(this, arguments);
     this.view = new TimelineView;
-    get('/data/photos.json', (function(_this) {
+    get('/data/info.json', (function(_this) {
       return function(data) {
         return _this.view.setPhotos(data.groups);
       };
@@ -355,7 +355,7 @@ PhotosGroupView = (function(_super) {
   PhotosGroupView.prototype.className = 'photosGroupView';
 
   PhotosGroupView.prototype.render = function() {
-    var args, extension, filename, i, image, pixelRatio, suffix, travelImage, _i, _len, _ref, _ref1, _results;
+    var args, extension, filename, i, image, pixelRatio, rowsLength, suffix, travelImage, _i, _len, _ref, _ref1, _results;
     pixelRatio = (_ref = window.devicePixelRatio) != null ? _ref : 1;
     suffix = pixelRatio === 1 ? '' : "@" + pixelRatio + "x";
     i = 0;
@@ -367,7 +367,8 @@ PhotosGroupView = (function(_super) {
       image.classList.add('image');
       image.classList.add(travelImage.type);
       if (travelImage.type === 'row') {
-        image.style.width = Math.round(100 / (this.options.group.images.length - 1)) + "%";
+        rowsLength = this.options.group.images.length - 1;
+        image.style.width = "calc((100% - " + (7 * (rowsLength - 1)) + "px) / " + rowsLength + ")";
       }
       args = travelImage.file.split('.');
       filename = args[0];

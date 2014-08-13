@@ -8,7 +8,7 @@ class Timeline extends Controller
 
     @view = new TimelineView
 
-    get '/data/photos.json', (data) =>
+    get '/data/info.json', (data) =>
       @view.setPhotos(data.groups)
 
 module.exports = Timeline
