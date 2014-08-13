@@ -24,6 +24,8 @@ start = ->
     createTimeline(groups)
   ).then(->
     console.log('Done!')
+  ).catch((e) ->
+    console.log(e)
   )
 
 parseGroup = (dir) ->
@@ -50,8 +52,6 @@ parseGroup = (dir) ->
     json.path = dir + "/"
 
     Q.all(ps).then(-> json)
-  ).catch((e) ->
-    console.log(e)
   )
 
 parseInfoFile = (groupDir, fileName, dstDir) ->
@@ -87,9 +87,12 @@ createTimeline = (groups) ->
           image = images[i]
           group.images.push(image)
           do (image) ->
-            processTimelineImage(group, image).then((filenames) ->
+            processTimelineImage(group, image).then((args) ->
               delete image.file
-              image.files = _.merge.apply(this, filenames)
+              image.files = args.files
+              image.size =
+                width: args.info.width
+                height: args.info.height
             )
   ).then(->
     console.log "Writing #{DST + "info.json"}"
@@ -99,11 +102,17 @@ createTimeline = (groups) ->
 processTimelineImage = (group, image) ->
   srcFile = SRC + group.path + image.file
   dstPath = DST + group.path
+  files = []
   resizeImage(srcFile, dstPath, {
     width: 380
   }, {
     suffix: '_timeline'
-  })
+  }).then((filenames) ->
+    files = _.merge.apply(this, filenames)
+    easyimage.info(dstPath + files['1x'])
+  ).then((info) ->
+    files: files, info: info
+  )
 
 resizeImage = (file, dstPath, opts = {}, others = {}) =>
   Q.all do ->
