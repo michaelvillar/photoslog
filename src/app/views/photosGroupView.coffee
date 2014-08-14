@@ -1,6 +1,7 @@
 View = require('view')
 
 pixelRatio = window.devicePixelRatio ? 1
+pixelRatio = {1:1, 2:2}[pixelRatio] ? 1
 ratio = "#{pixelRatio}x"
 
 class PhotosGroupView extends View
