@@ -1,12 +1,12 @@
 View = require('view')
 PhotosGroupView = require('photosGroupView')
 
-class TimelineView extends View
-  className: 'timelineView'
+class PhotosGroupsView extends View
+  className: 'photosGroupsView'
 
-  setPhotos: (groups) =>
+  setGroups: (groups) =>
     for group in groups
       photosGroupView = new PhotosGroupView({ group: group })
       @addSubview(photosGroupView)
 
-module.exports = TimelineView
+module.exports = PhotosGroupsView

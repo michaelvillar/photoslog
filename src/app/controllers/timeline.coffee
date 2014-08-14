@@ -1,14 +1,14 @@
 Controller = require('controller')
-TimelineView = require('timelineView')
+PhotosGroupsView = require('photosGroupsView')
 get = require('get')
 
 class Timeline extends Controller
   constructor: ->
     super
 
-    @view = new TimelineView
+    @view = new PhotosGroupsView
 
     get '/data/info.json', (data) =>
-      @view.setPhotos(data.groups)
+      @view.setGroups(data.groups)
 
 module.exports = Timeline
