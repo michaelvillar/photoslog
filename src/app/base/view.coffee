@@ -24,4 +24,7 @@ class View extends EventDispatcher
     for subview in subviews
       @addSubview(subview)
 
+  text: (text) =>
+    @el.innerHTML = text
+
 module.exports = View
