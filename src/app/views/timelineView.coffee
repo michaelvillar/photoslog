@@ -1,5 +1,7 @@
 View = require('view')
 
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
 class TimelineView extends View
   className: 'timelineView'
 
@@ -10,6 +12,7 @@ class TimelineView extends View
     @addSubview(verticalLineView)
 
   setGroups: (groups) =>
+    groups = groups.reverse()
     for group in groups
       itemView = new View(tag: 'a')
 
@@ -18,7 +21,11 @@ class TimelineView extends View
       itemView.addSubview(textView)
 
       dateView = new View(tag: 'span', className: 'dateView')
-      dateView.text('AUG 2013')
+
+      date = new Date(group.date)
+      monthString = months[date.getMonth()].toUpperCase()
+
+      dateView.text("#{monthString} #{date.getFullYear()}")
       itemView.addSubview(dateView)
 
       circleView = new View(tag: 'span', className: 'circleView')
