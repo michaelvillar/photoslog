@@ -74,9 +74,9 @@ parseInfoFile = (groupDir, fileName, dstDir) ->
   )
 
 createTimeline = (groups) ->
-  json = { groups: [] }
-  for group in groups
-    json.groups.push(clone(group))
+  json = {}
+  json.groups = groups.sort (a, b) ->
+    new Date(a.date) > new Date(b.date)
 
   Q.all(
     _.flatten do ->
