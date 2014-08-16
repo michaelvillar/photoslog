@@ -13,6 +13,13 @@ class TimelineView extends View
 
   setGroups: (groups) =>
     groups = groups.reverse()
+    currentYear = null
+
+    addYearView = (year) =>
+      yearView = new View(tag: 'p', className: 'yearView')
+      yearView.text(year)
+      @addSubview(yearView)
+
     for group in groups
       itemView = new View(tag: 'a')
 
@@ -32,5 +39,12 @@ class TimelineView extends View
       itemView.addSubview(circleView)
 
       @addSubview(itemView)
+
+      if currentYear? and currentYear != date.getFullYear()
+        addYearView(currentYear)
+
+      currentYear = date.getFullYear()
+
+    addYearView(currentYear) if currentYear?
 
 module.exports = TimelineView
