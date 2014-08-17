@@ -7,7 +7,7 @@ class App extends Controller
   constructor: ->
     super
 
-    @view = new View({ el: document.body })
+    @view = new View({ el: document.body, className: 'appView' })
     @timeline = new Timeline
     @view.addSubview(@timeline.view)
 

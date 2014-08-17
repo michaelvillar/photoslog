@@ -11,7 +11,7 @@ class Timeline extends Controller
     @view = new View
 
     @photosGroupsView = new PhotosGroupsView
-    # @view.addSubview(@photosGroupsView)
+    @view.addSubview(@photosGroupsView)
 
     @timelineView = new TimelineView
     @view.addSubview(@timelineView)
