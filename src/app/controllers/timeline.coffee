@@ -10,14 +10,27 @@ class Timeline extends Controller
 
     @view = new View
 
-    @photosGroupsView = new PhotosGroupsView
-    @view.addSubview(@photosGroupsView)
-
     @timelineView = new TimelineView
     @view.addSubview(@timelineView)
 
+    @photosGroupsView = new PhotosGroupsView
+    @view.addSubview(@photosGroupsView)
+
     get '/data/info.json', (data) =>
-      @photosGroupsView.setGroups(data.groups)
-      @timelineView.setGroups(data.groups)
+      groups = data.groups.reverse()
+
+      @photosGroupsView.setGroups(groups)
+      @timelineView.setGroups(groups)
+      @updateVisibleGroups()
+
+    window.addEventListener('scroll', @onScroll)
+
+  # Private
+  updateVisibleGroups: =>
+    @timelineView.setVisibleGroups(@photosGroupsView.visibleGroups())
+
+  # Events
+  onScroll: =>
+    @updateVisibleGroups()
 
 module.exports = Timeline

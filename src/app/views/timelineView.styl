@@ -4,13 +4,22 @@
   > .verticalLineView {
     position: absolute
     display: block
-    top: 18px
+    top: 32px
     left: 187px
-    height: calc(200% - 36px)
+    height: calc(200% - 64px)
     width: 1px
     background: #B0B0B0
     transform: scale(.5)
     transform-origin: 0 0
+  }
+
+  > .curvedLinesCanvas {
+    position: absolute
+    top: 0
+    right: -82px
+    height: 100%
+    width: 95px
+    background: white
   }
 
   > a,
@@ -35,8 +44,8 @@
     cursor: pointer
     color: #565656
 
-    &:first-child {
-      margin-top: -18px
+    &:first-of-type {
+      margin-top: 15px
     }
 
     > span {
