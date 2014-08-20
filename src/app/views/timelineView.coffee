@@ -19,8 +19,11 @@ class TimelineView extends View
     @ctx = @canvas.el.getContext("2d")
     @addSubview(@canvas)
 
+    @containerView = new View(className: 'containerView')
+    @addSubview(@containerView)
+
     verticalLineView = new View(tag: 'span', className: 'verticalLineView')
-    @addSubview(verticalLineView)
+    @containerView.addSubview(verticalLineView)
 
     @selectedGroup = null
 
@@ -66,7 +69,7 @@ class TimelineView extends View
     addYearView = (year) =>
       yearView = new View(tag: 'p', className: 'yearView')
       yearView.text(year)
-      @addSubview(yearView)
+      @containerView.addSubview(yearView)
 
     for group in groups
       itemView = new View(tag: 'a', group: group)
@@ -86,7 +89,7 @@ class TimelineView extends View
       circleView = new View(tag: 'span', className: 'circleView')
       itemView.addSubview(circleView)
 
-      @addSubview(itemView)
+      @containerView.addSubview(itemView)
 
       if currentYear? and currentYear != date.getFullYear()
         addYearView(currentYear)
@@ -96,7 +99,7 @@ class TimelineView extends View
     addYearView(currentYear) if currentYear?
 
   itemForGroup: (group) =>
-    for view in @subviews
+    for view in @containerView.subviews
       return view if view.options.group == group
     null
 

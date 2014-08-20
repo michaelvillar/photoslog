@@ -1,18 +1,6 @@
 .timelineView {
   width: 200px
 
-  > .verticalLineView {
-    position: absolute
-    display: block
-    top: 32px
-    left: 187px
-    height: calc(200% - 64px)
-    width: 1px
-    background: #B0B0B0
-    transform: scale(.5)
-    transform-origin: 0 0
-  }
-
   > .curvedLinesCanvas {
     position: absolute
     top: 0
@@ -22,98 +10,112 @@
     background: white
   }
 
-  > a,
-  > .yearView {
-    position: relative
-    display: block
-    width: 100%
-    box-sizing: border-box
-    text-align: right
-    height: 36px
-    line-height: 36px
-  }
-
-  > .yearView {
-    color: #B0B0B0
-    font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
-    font-size: 18px
-    padding-right: 31px
-  }
-
-  > a {
-    cursor: pointer
-    color: #565656
-
-    &:first-of-type {
-      margin-top: 15px
-    }
-
-    > span {
-      display: inline-block
-      vertical-align: top
-      transform: scale(.5)
-      transition: all .15s ease-in-out
-    }
-
-    > .textView {
-      font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
-      transform-origin: 100% 50%
-      font-size: 36px
-      width: 200%
-      margin-left: -200%
-    }
-
-    > .dateView {
+  > .containerView {
+    > .verticalLineView {
       position: absolute
-      width: 200px
-      right: 31px
-      left: auto
-      top: 13px
-      transform: none
+      display: block
+      top: 32px
+      left: 187px
+      height: calc(200% - 64px)
+      width: 1px
+      background: #B0B0B0
+      transform: scale(.5)
+      transform-origin: 0 0
+    }
+
+    > a,
+    > .yearView {
+      position: relative
+      display: block
+      width: 100%
+      box-sizing: border-box
+      text-align: right
+      height: 36px
+      line-height: 36px
+    }
+
+    > .yearView {
+      color: #B0B0B0
       font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
-      font-size: 11px
-      color: #0091FF
-      opacity: 0
-      transform-origin: 100% 50%
-      transform: scale(.75) translateY(-7px)
+      font-size: 18px
+      padding-right: 31px
     }
 
-    > .circleView {
-      width: 19px
-      height: 19px
-      border-radius: 19px
-      border: 3px solid #565656
-      background: #fff
-      margin-top: 7px
-      margin-left: 6px
-    }
+    > a {
+      cursor: pointer
+      color: #565656
 
-    &:hover {
-      > .textView {
-        color: #000
-        transform: scale(.55)
+      &:first-of-type {
+        margin-top: 15px
       }
 
-      > .circleView {
-        border-color: #000
-        transform: scale(.55)
+      > span {
+        display: inline-block
+        vertical-align: top
+        transform: scale(.5)
+        transition: all .15s ease-in-out
       }
-    }
 
-    &.selected {
       > .textView {
-        color: #0091FF
-        transform: scale(.75) translateY(-7px)
+        font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
+        transform-origin: 100% 50%
+        font-size: 36px
+        width: 200%
+        margin-left: -200%
       }
 
       > .dateView {
-        opacity: 1
+        position: absolute
+        width: 200px
+        right: 31px
+        left: auto
+        top: 13px
         transform: none
+        font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
+        font-size: 11px
+        color: #0091FF
+        opacity: 0
+        transform-origin: 100% 50%
+        transform: scale(.75) translateY(-7px)
       }
 
       > .circleView {
-        border-color: #0091FF
-        transform: scale(.75)
+        width: 19px
+        height: 19px
+        border-radius: 19px
+        border: 3px solid #565656
+        background: #fff
+        margin-top: 7px
+        margin-left: 6px
+      }
+
+      &:hover {
+        > .textView {
+          color: #000
+          transform: scale(.55)
+        }
+
+        > .circleView {
+          border-color: #000
+          transform: scale(.55)
+        }
+      }
+
+      &.selected {
+        > .textView {
+          color: #0091FF
+          transform: scale(.75) translateY(-7px)
+        }
+
+        > .dateView {
+          opacity: 1
+          transform: none
+        }
+
+        > .circleView {
+          border-color: #0091FF
+          transform: scale(.75)
+        }
       }
     }
   }
