@@ -123,7 +123,7 @@ class TimelineView extends View
         ctx.strokeStyle = '#0091FF'
         ctx.lineWidth = '3'
       else
-        ctx.strokeStyle = '#B0B0B0'
+        ctx.strokeStyle = "rgba(176, 176, 176, #{Math.min(1, group.portion * 4)})"
         ctx.lineWidth = '1'
 
       @drawLine(ctx, { x: 0, y: itemRect.y + itemRect.height / 2 }, { x: 95, y: groupRect.y + groupRect.height / 2 })
