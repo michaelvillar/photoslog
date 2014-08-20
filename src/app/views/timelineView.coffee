@@ -19,17 +19,19 @@ class TimelineView extends View
     @ctx = @canvas.el.getContext("2d")
     @addSubview(@canvas)
 
+    @verticalLineView = new View(tag: 'span', className: 'verticalLineView')
+    @addSubview(@verticalLineView)
+
     @containerView = new View(className: 'containerView')
     @addSubview(@containerView)
 
-    verticalLineView = new View(tag: 'span', className: 'verticalLineView')
-    @containerView.addSubview(verticalLineView)
-
     @selectedGroup = null
 
-    window.addEventListener('resize', @updateCanvasSize)
+    window.addEventListener('resize', @onResize)
     setTimeout =>
       @updateCanvasSize()
+      @center()
+      @redraw()
     , 100
 
   setVisibleGroups: (groups) =>
@@ -106,6 +108,16 @@ class TimelineView extends View
   updateCanvasSize: =>
     @canvas.el.width = 95 * pixelRatio
     @canvas.el.height = @canvas.height() * pixelRatio
+
+  center: =>
+    height = @height()
+    containerHeight = @containerView.height()
+    marginTop = (height - containerHeight) * 0.4
+    marginTop = Math.max(16, marginTop)
+    @containerView.el.style.marginTop = "#{marginTop}px"
+    @verticalLineView.el.style.marginTop = "#{marginTop}px"
+
+  redraw: =>
     @draw(@ctx)
 
   draw: (ctx) =>
@@ -140,5 +152,11 @@ class TimelineView extends View
     ctx.bezierCurveTo(midX, from.y, midX, to.y, to.x, to.y)
     ctx.stroke()
     ctx.closePath()
+
+  # Events
+  onResize: =>
+    @updateCanvasSize()
+    @center()
+    @redraw()
 
 module.exports = TimelineView
