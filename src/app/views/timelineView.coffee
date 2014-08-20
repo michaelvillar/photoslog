@@ -35,9 +35,18 @@ class TimelineView extends View
     @visibleGroups = groups
 
     @selectedGroup = null
+    maxPortion = 0
+    maxGroup = null
     for group in groups
-      @selectedGroup = group.group
-      break
+      if group.portion > 0.66
+        @selectedGroup = group.group
+        break
+
+      if group.portion > maxPortion
+        maxPortion = group.portion
+        maxGroup = group.group
+
+    @selectedGroup = maxGroup if !@selectedGroup
 
     if @selectedGroup
       item = @itemForGroup(@selectedGroup)

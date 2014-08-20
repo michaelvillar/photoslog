@@ -16,7 +16,8 @@ class PhotosGroupsView extends View
       if visibleBounds?
         visibleGroups.push({
           group: view.options.group,
-          rect: visibleBounds
+          rect: visibleBounds,
+          portion: visibleBounds.height / view.height()
         })
     visibleGroups
 
