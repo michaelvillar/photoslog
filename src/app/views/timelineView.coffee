@@ -22,13 +22,33 @@ class TimelineView extends View
     verticalLineView = new View(tag: 'span', className: 'verticalLineView')
     @addSubview(verticalLineView)
 
+    @selectedGroup = null
+
     window.addEventListener('resize', @updateCanvasSize)
     setTimeout =>
       @updateCanvasSize()
     , 100
 
   setVisibleGroups: (groups) =>
+    groups.sort (a, b) ->
+      a.rect.y > b.rect.y
     @visibleGroups = groups
+
+    @selectedGroup = null
+    for group in groups
+      @selectedGroup = group.group
+      break
+
+    if @selectedGroup
+      item = @itemForGroup(@selectedGroup)
+      if item and item != @selectedItem
+        @selectedItem?.el.classList.remove('selected')
+        item.el.classList.add('selected')
+        @selectedItem = item
+    else
+      @selectedItem?.el.classList.remove('selected')
+      @selectedItem = null
+
     @draw(@ctx)
 
   setGroups: (groups) =>
@@ -83,15 +103,19 @@ class TimelineView extends View
 
     return if !@visibleGroups? or @visibleGroups.length == 0
 
-    ctx.strokeStyle = '#B0B0B0'
-    ctx.lineWidth = '1'
-
     for group in @visibleGroups
       item = @itemForGroup(group.group)
       continue unless item?
 
       itemRect = item.frame()
       groupRect = group.rect
+
+      if group.group == @selectedGroup
+        ctx.strokeStyle = '#0091FF'
+        ctx.lineWidth = '3'
+      else
+        ctx.strokeStyle = '#B0B0B0'
+        ctx.lineWidth = '1'
 
       @drawLine(ctx, { x: 0, y: itemRect.y + itemRect.height / 2 }, { x: 95, y: groupRect.y + groupRect.height / 2 })
 
