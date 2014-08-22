@@ -1,4 +1,5 @@
 EventDispatcher = require('eventDispatcher')
+scroll = require('scroll')
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
@@ -11,21 +12,10 @@ getOffset = (el, property) ->
   value
 
 convertCoordinateToScreen = (coordinates) ->
-  scroll = getWindowScroll()
   obj = clone(coordinates)
-  obj.x = coordinates.x - scroll.x
-  obj.y = coordinates.y - scroll.y
+  obj.x = coordinates.x - scroll.value.x
+  obj.y = coordinates.y - scroll.value.y
   obj
-
-getWindowScroll = do ->
-  scroll = {}
-  gen = ->
-    scroll =
-      x: window.scrollX
-      y: window.scrollY
-  gen()
-  window.addEventListener('scroll', gen)
-  -> scroll
 
 getWindowSize = do ->
   size = {}

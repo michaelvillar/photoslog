@@ -30,12 +30,15 @@ class Timeline extends Controller
   bindEvents: =>
     @timelineView.on('click', @onClick)
     @timelineView.on('selectedGroupDidChange', @onSelectedGroupDidChange)
-    window.addEventListener('scroll', @onScroll)
+    scroll.on('change', @onScroll)
 
   setSelectedGroup: (group) =>
     clearTimeout(@timeout)
     @timelineView.setSelectedGroup(group)
-    scroll.to(@photosGroupsView.groupViewY(group))
+    scroll.to(
+      y: @photosGroupsView.groupViewY(group),
+      views: [@photosGroupsView]
+    )
     @onScroll()
 
   scrollToSelectedGroup: =>

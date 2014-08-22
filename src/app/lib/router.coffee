@@ -22,16 +22,7 @@ router.goTo = (state, url) ->
 
 router.state = {}
 
-cancelScroll = (e) ->
-  scroll = { x: window.scrollX, y: window.scrollY }
-  e.preventDefault()
-  document.removeEventListener('scroll', cancelScroll)
-  setTimeout ->
-    window.scrollTo(scroll.x, scroll.y)
-  , 1
-
 window.addEventListener 'popstate', (e) =>
-  # document.addEventListener('scroll', cancelScroll)
   router.state = e.state
   router.trigger('change', e.state)
 

@@ -1133,7 +1133,7 @@ this.require.define({"loop":function(exports, require, module){(function() {
       return this.running = false;
     },
     tick: function(ts) {
-      var animation, el, elProperties, found, k, properties, propertiesByEls, tween, tweens, v, _base, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
+      var animation, el, elProperties, found, k, properties, propertiesByEls, tween, tweens, v, _base, _base1, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
       if (!this.running) {
         return;
       }
@@ -1189,6 +1189,11 @@ this.require.define({"loop":function(exports, require, module){(function() {
         tween = tweens[_m];
         if (typeof (_base = tween.options).change === "function") {
           _base.change(tween.t, tween.value);
+        }
+        if (tween.t === 1) {
+          if (typeof (_base1 = tween.options).complete === "function") {
+            _base1.complete();
+          }
         }
       }
       this.removeUselessTweens();
@@ -1763,7 +1768,7 @@ this.require.define({"tween":function(exports, require, module){(function() {
     };
 
     Tween.prototype.tick = function(ts) {
-      var dTs, _base;
+      var dTs;
       if (this.stopped) {
         Loop.remove(this);
         return;
@@ -1781,9 +1786,6 @@ this.require.define({"tween":function(exports, require, module){(function() {
       this.value = this.dynamic.at(this.t)[1];
       if (this.t === 1) {
         Loop.remove(this);
-        if (typeof (_base = this.options).complete === "function") {
-          _base.complete();
-        }
         this.stopped = true;
         return this.animating = false;
       }
