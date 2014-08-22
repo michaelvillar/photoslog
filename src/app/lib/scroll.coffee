@@ -61,6 +61,7 @@ scroll.to = (options = {}) ->
     anticipationSize: 34,
     duration: 1000,
     change: ->
+      return unless scroll.scrolling
       for view in dynamicViews
         view.css(translateY: - obj.y + initial, translateZ: 0)
       scroll.value =
@@ -68,6 +69,7 @@ scroll.to = (options = {}) ->
         y: obj.y
       scroll.trigger('change', obj.y)
     complete: ->
+      return unless scroll.scrolling
       restore(obj.y)
   }).start()
 
