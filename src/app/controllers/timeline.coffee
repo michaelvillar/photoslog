@@ -33,7 +33,6 @@ class Timeline extends Controller
     scroll.on('change', @onScroll)
 
   setSelectedGroup: (group) =>
-    clearTimeout(@timeout)
     @timelineView.setSelectedGroup(group)
     scroll.to(
       y: @photosGroupsView.groupViewY(group),
@@ -56,10 +55,7 @@ class Timeline extends Controller
     router.goToGroup(group)
 
   onSelectedGroupDidChange: (group) =>
-    clearTimeout(@timeout)
-    @timeout = setTimeout ->
-      router.dontTrigger ->
-        router.goToGroup(group)
-    , 100
+    return if scroll.scrolling
+    router.goToGroup(group, { trigger: false })
 
 module.exports = Timeline

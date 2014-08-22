@@ -7,6 +7,8 @@ scroll.value =
   x: 0
   y: 0
 
+scroll.scrolling = false
+
 window.addEventListener('scroll', ->
   scroll.value =
     x: window.scrollX
@@ -15,6 +17,7 @@ window.addEventListener('scroll', ->
 )
 
 scroll.to = (options = {}) ->
+  scroll.scrolling = true
   body = document.body
   html = document.documentElement
 
@@ -39,16 +42,17 @@ scroll.to = (options = {}) ->
     duration: 1000,
     change: ->
       for view in dynamicViews
-        view.css(translateY: - obj.y + initial)
+        view.css(translateY: - obj.y + initial, translateZ: 0)
       scroll.value =
         x: scroll.value.x
         y: obj.y
       scroll.trigger('change', obj.y)
     complete: ->
       for view in dynamicViews
-        view.css(translateY: 0)
+        view.css(translateY: 0, translateZ: 0)
       window.scrollTo(0, obj.y)
       document.body.style.height = "auto"
+      scroll.scrolling = false
   }).start()
 
 module.exports = scroll
