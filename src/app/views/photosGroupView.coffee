@@ -11,6 +11,9 @@ class PhotosGroupView extends View
     @appendFullImage(@options.group.images[0])
     @appendRowImages(@options.group.images[1..@options.group.images.length - 1])
 
+  bindEvents: =>
+    window.addEventListener('resize', @invalidate)
+
   appendFullImage: (image) =>
     img = @createImage(image)
     img.style.height = "#{image.size.height}px"
@@ -50,5 +53,13 @@ class PhotosGroupView extends View
     img.classList.add(image.type)
     img.style.backgroundImage = "url(" + ["/data", @options.group.path, image.files[ratio]].join('/') + ")"
     img
+
+  invalidate: =>
+    @cachedFrame = null
+
+  frame: =>
+    if !@cachedFrame
+      @cachedFrame = super
+    @cachedFrame
 
 module.exports = PhotosGroupView

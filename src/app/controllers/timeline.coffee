@@ -4,6 +4,7 @@ PhotosGroupsView = require('photosGroupsView')
 TimelineView = require('timelineView')
 get = require('get')
 router = require('router')
+scroll = require('scroll')
 
 class Timeline extends Controller
   constructor: ->
@@ -34,7 +35,7 @@ class Timeline extends Controller
   setSelectedGroup: (group) =>
     clearTimeout(@timeout)
     @timelineView.setSelectedGroup(group)
-    window.scrollTo(0, @photosGroupsView.groupViewY(group))
+    scroll.to(@photosGroupsView.groupViewY(group))
     @onScroll()
 
   scrollToSelectedGroup: =>
@@ -45,7 +46,8 @@ class Timeline extends Controller
 
   # Events
   onScroll: =>
-    @updateVisibleGroups()
+    requestAnimationFrame =>
+      @updateVisibleGroups()
 
   onClick: (group) =>
     router.goToGroup(group)

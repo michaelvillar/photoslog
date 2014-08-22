@@ -11,14 +11,31 @@ getOffset = (el, property) ->
   value
 
 convertCoordinateToScreen = (coordinates) ->
+  scroll = getWindowScroll()
   obj = clone(coordinates)
-  obj.x = coordinates.x - window.scrollX
-  obj.y = coordinates.y - window.scrollY
+  obj.x = coordinates.x - scroll.x
+  obj.y = coordinates.y - scroll.y
   obj
 
-getWindowSize = ->
-  width: window.innerWidth
-  height: window.innerHeight
+getWindowScroll = do ->
+  scroll = {}
+  gen = ->
+    scroll =
+      x: window.scrollX
+      y: window.scrollY
+  gen()
+  window.addEventListener('scroll', gen)
+  -> scroll
+
+getWindowSize = do ->
+  size = {}
+  gen = ->
+    size =
+      width: window.innerWidth
+      height: window.innerHeight
+  gen()
+  window.addEventListener('resize', gen)
+  -> size
 
 getRectsIntersection = (a, b) ->
   x = Math.max(a.x, b.x);

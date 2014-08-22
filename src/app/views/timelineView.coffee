@@ -130,7 +130,8 @@ class TimelineView extends View
     @verticalLineView.el.style.marginTop = "#{marginTop}px"
 
   redraw: =>
-    @draw(@ctx)
+    requestAnimationFrame =>
+      @draw(@ctx)
 
   draw: (ctx) =>
     canvasWidth = @canvas.el.width / pixelRatio
