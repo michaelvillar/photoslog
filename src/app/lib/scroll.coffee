@@ -1,6 +1,18 @@
 EventDispatcher = require('eventDispatcher')
 require('dynamics.js')
 
+dynamicViews = null
+dynamicObj = null
+obj = null
+
+restore = (y) ->
+  for view in dynamicViews
+    view.css(translateY: 0, translateZ: 0)
+  window.scrollTo(0, y)
+  document.body.style.height = "auto"
+  scroll.scrolling = false
+  dynamicObj = null
+
 scroll = new EventDispatcher
 
 scroll.value =
@@ -10,6 +22,9 @@ scroll.value =
 scroll.scrolling = false
 
 window.addEventListener('scroll', ->
+  if dynamicObj?
+    dynamicObj.stop()
+    restore(obj.y)
   scroll.value =
     x: window.scrollX
     y: window.scrollY
@@ -17,6 +32,10 @@ window.addEventListener('scroll', ->
 )
 
 scroll.to = (options = {}) ->
+  if dynamicObj?
+    dynamicObj.stop()
+    dynamicObj = null
+
   scroll.scrolling = true
   body = document.body
   html = document.documentElement
@@ -29,9 +48,10 @@ scroll.to = (options = {}) ->
   options.y = Math.min(options.y, bodyHeight - window.innerHeight)
 
   obj = { y: scroll.value.y }
-  initial = obj.y
+  initial = window.scrollY
   dynamicViews = options.views.map (view) -> dynamic(view.el)
-  dynamic(obj).to({
+  dynamicObj = dynamic(obj)
+  dynamicObj.to({
     y: options.y
   }, {
     type: dynamic.Spring,
@@ -48,11 +68,7 @@ scroll.to = (options = {}) ->
         y: obj.y
       scroll.trigger('change', obj.y)
     complete: ->
-      for view in dynamicViews
-        view.css(translateY: 0, translateZ: 0)
-      window.scrollTo(0, obj.y)
-      document.body.style.height = "auto"
-      scroll.scrolling = false
+      restore(obj.y)
   }).start()
 
 module.exports = scroll

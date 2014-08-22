@@ -63,247 +63,6 @@ window.dynamic = function() {
 var require = this.require;
 
 
-this.require.define({"animation":function(exports, require, module){(function() {
-  var Animation, Animations, Matrix, Tween, dynamics, getFirstFrame, hasCommonProperties, helpers, keysForTransform, parseFrames, stopAnimationsForEl,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  Tween = require('tween');
-
-  helpers = require('helpers');
-
-  Matrix = require('matrix');
-
-  dynamics = require('dynamics');
-
-  getFirstFrame = function(properties) {
-    var frame, k, style, v, _ref;
-    frame = {};
-    if (this.el.style != null) {
-      style = window.getComputedStyle(this.el, null);
-      for (k in properties) {
-        if (helpers.transformProperties.contains(k)) {
-          k = 'transform';
-        }
-        if (!frame[k]) {
-          v = this.el.style[helpers.support.propertyWithPrefix(k)];
-          if (v == null) {
-            v = style[helpers.support.propertyWithPrefix(k)];
-          }
-          frame[k] = v;
-        }
-      }
-    } else {
-      _ref = this.el;
-      for (k in _ref) {
-        v = _ref[k];
-        frame[k] = v;
-      }
-    }
-    return frame;
-  };
-
-  parseFrames = function(frames) {
-    var k, match, newFrames, newProperties, percent, properties, transform, transforms, unit, v, vString, value;
-    newFrames = {};
-    for (percent in frames) {
-      properties = frames[percent];
-      transforms = [];
-      newProperties = {};
-      for (k in properties) {
-        v = properties[k];
-        if (k === 'transform') {
-          transforms.push(v);
-        } else if (helpers.transformProperties.contains(k)) {
-          v = "" + k + "(" + v + (helpers.unitForProperty(k, v)) + ")";
-          transforms.push(v);
-        } else {
-          vString = v + "";
-          match = vString.match(/([-0-9.]*)(.*)/);
-          value = parseFloat(match[1]);
-          unit = match[2];
-          newProperties[k] = {
-            value: value,
-            originalValue: v,
-            unit: unit
-          };
-        }
-      }
-      if (transforms.length > 0) {
-        transform = transforms.join(' ');
-        newProperties['transform'] = {
-          value: Matrix.fromTransform(Matrix.transformStringToMatrixString(transform)).decompose(),
-          originalValue: transform,
-          unit: ''
-        };
-      }
-      newFrames[percent] = newProperties;
-    }
-    return newFrames;
-  };
-
-  keysForTransform = function(transform) {
-    var keys, match, matches, _i, _len;
-    matches = transform.match(/[a-zA-Z0-9]*\([^)]*\)/g);
-    keys = [];
-    if (matches != null) {
-      for (_i = 0, _len = matches.length; _i < _len; _i++) {
-        match = matches[_i];
-        keys.push(match.substring(0, match.indexOf('(')));
-      }
-    }
-    return keys;
-  };
-
-  Animations = [];
-
-  hasCommonProperties = function(props1, props2) {
-    var k, v;
-    for (k in props1) {
-      v = props1[k];
-      if (props2[k] != null) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  stopAnimationsForEl = function(el, properties) {
-    var animation, _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = Animations.length; _i < _len; _i++) {
-      animation = Animations[_i];
-      if (animation.el === el && hasCommonProperties(animation.to, properties)) {
-        _results.push(animation.stop());
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  Animation = (function() {
-    function Animation(el, to, options) {
-      var animation, k, key, pos, redraw, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
-      this.el = el;
-      this.to = to;
-      if (options == null) {
-        options = {};
-      }
-      this.stop = __bind(this.stop, this);
-      this.start = __bind(this.start, this);
-      this.dynamic = __bind(this.dynamic, this);
-      this.setOptions = __bind(this.setOptions, this);
-      if (window['jQuery'] && this.el instanceof jQuery) {
-        this.el = this.el[0];
-      }
-      this.animating = false;
-      redraw = this.el.offsetHeight;
-      this.frames = parseFrames({
-        0: getFirstFrame.call(this, this.to),
-        100: this.to
-      });
-      this.keysToInterpolate = [];
-      for (k in this.frames[100]) {
-        if (k !== 'transform') {
-          this.keysToInterpolate.push(k.toLowerCase());
-        }
-      }
-      if (this.frames[100]['transform'] != null) {
-        _ref = keysForTransform(this.frames[100]['transform'].originalValue);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          k = _ref[_i];
-          this.keysToInterpolate.push(k);
-        }
-        this.keysToInterpolate = this.keysToInterpolate.map(function(e) {
-          return e.toLowerCase();
-        });
-      }
-      for (_j = 0, _len1 = Animations.length; _j < _len1; _j++) {
-        animation = Animations[_j];
-        if (animation.el !== this.el) {
-          continue;
-        }
-        _ref1 = this.keysToInterpolate;
-        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-          key = _ref1[_k];
-          pos = animation.keysToInterpolate.indexOf(key);
-          if (pos === -1) {
-            continue;
-          }
-          animation.keysToInterpolate.splice(pos, 1);
-        }
-      }
-      this.setOptions(options);
-      if (this.options.debugName && Dynamics.InteractivePanel) {
-        Dynamics.InteractivePanel.addAnimation(this);
-      }
-      Animations.push(this);
-    }
-
-    Animation.prototype.setOptions = function(options) {
-      var _base, _base1, _base2, _base3;
-      if (options == null) {
-        options = {};
-      }
-      this.options = options;
-      if ((_base = this.options).duration == null) {
-        _base.duration = 1000;
-      }
-      if ((_base1 = this.options).complete == null) {
-        _base1.complete = null;
-      }
-      if ((_base2 = this.options).type == null) {
-        _base2.type = dynamics.Linear;
-      }
-      if ((_base3 = this.options).animated == null) {
-        _base3.animated = true;
-      }
-      if ((this.options.debugName != null) && (Dynamics.Overrides != null) && Dynamics.Overrides["for"](this.options.debugName)) {
-        this.options = Dynamics.Overrides.getOverride(this.options, this.options.debugName);
-      }
-      this.tween = new Tween(this.options);
-      this.tween.animation = this;
-      this.dynamic().init();
-      return this.returnsToSelf = false || this.dynamic().returnsToSelf;
-    };
-
-    Animation.prototype.dynamic = function() {
-      return this.tween.dynamic;
-    };
-
-    Animation.prototype.start = function(options) {
-      if (options == null) {
-        options = {};
-      }
-      if (options.delay == null) {
-        options.delay = this.options.delay;
-      }
-      if (options.delay == null) {
-        options.delay = 0;
-      }
-      stopAnimationsForEl(this.el, this.to);
-      if (options.delay <= 0) {
-        return this.tween.start();
-      } else {
-        return setTimeout(this.tween.start.bind(this.tween), options.delay);
-      }
-    };
-
-    Animation.prototype.stop = function() {
-      this.animating = false;
-      return this.stopped = true;
-    };
-
-    return Animation;
-
-  })();
-
-  module.exports = Animation;
-
-}).call(this);
-;}});
-
-
 this.require.define({"dynamics":function(exports, require, module){(function() {
   var Bezier, Dynamic, EaseInOut, Gravity, GravityWithForce, Linear, SelfSpring, Spring, dynamics,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -885,6 +644,7 @@ this.require.define({"element":function(exports, require, module){(function() {
     function Element(el) {
       this.isAnimating = __bind(this.isAnimating, this);
       this.delay = __bind(this.delay, this);
+      this.stop = __bind(this.stop, this);
       this.start = __bind(this.start, this);
       this.to = __bind(this.to, this);
       this.css = __bind(this.css, this);
@@ -892,7 +652,7 @@ this.require.define({"element":function(exports, require, module){(function() {
       this._el = el;
       this._delay = 0;
       this._animations = [];
-      this._runningAnimations = 0;
+      this._runningAnimations = [];
     }
 
     Element.prototype.el = function() {
@@ -914,7 +674,7 @@ this.require.define({"element":function(exports, require, module){(function() {
       oldComplete = options.complete;
       options.complete = (function(_this) {
         return function() {
-          _this._runningAnimations -= 1;
+          _this._runningAnimations.splice(_this._runningAnimations.indexOf(animation), 1);
           return oldComplete != null ? oldComplete.call(_this, _this, to, animation.options) : void 0;
         };
       })(this);
@@ -927,11 +687,22 @@ this.require.define({"element":function(exports, require, module){(function() {
       _ref = this._animations;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         animation = _ref[_i];
-        this._runningAnimations += 1;
+        this._runningAnimations.push(animation);
         animation.start();
       }
       this._animations = [];
       this._delay = 0;
+      return this;
+    };
+
+    Element.prototype.stop = function() {
+      var animation, _i, _len, _ref;
+      _ref = this._runningAnimations;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        animation = _ref[_i];
+        animation.stop();
+      }
+      this._runningAnimations = [];
       return this;
     };
 
@@ -941,7 +712,7 @@ this.require.define({"element":function(exports, require, module){(function() {
     };
 
     Element.prototype.isAnimating = function() {
-      return this._runningAnimations > 0;
+      return this._runningAnimations.length > 0;
     };
 
     return Element;
@@ -949,6 +720,251 @@ this.require.define({"element":function(exports, require, module){(function() {
   })();
 
   module.exports = Element;
+
+}).call(this);
+;}});
+
+
+this.require.define({"animation":function(exports, require, module){(function() {
+  var Animation, Animations, Matrix, Tween, dynamics, getFirstFrame, hasCommonProperties, helpers, keysForTransform, parseFrames, stopAnimationsForEl,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Tween = require('tween');
+
+  helpers = require('helpers');
+
+  Matrix = require('matrix');
+
+  dynamics = require('dynamics');
+
+  getFirstFrame = function(properties) {
+    var frame, k, style, v, _ref;
+    frame = {};
+    if (this.el.style != null) {
+      style = window.getComputedStyle(this.el, null);
+      for (k in properties) {
+        if (helpers.transformProperties.contains(k)) {
+          k = 'transform';
+        }
+        if (!frame[k]) {
+          v = this.el.style[helpers.support.propertyWithPrefix(k)];
+          if (v == null) {
+            v = style[helpers.support.propertyWithPrefix(k)];
+          }
+          frame[k] = v;
+        }
+      }
+    } else {
+      _ref = this.el;
+      for (k in _ref) {
+        v = _ref[k];
+        frame[k] = v;
+      }
+    }
+    return frame;
+  };
+
+  parseFrames = function(frames) {
+    var k, match, newFrames, newProperties, percent, properties, transform, transforms, unit, v, vString, value;
+    newFrames = {};
+    for (percent in frames) {
+      properties = frames[percent];
+      transforms = [];
+      newProperties = {};
+      for (k in properties) {
+        v = properties[k];
+        if (k === 'transform') {
+          transforms.push(v);
+        } else if (helpers.transformProperties.contains(k)) {
+          v = "" + k + "(" + v + (helpers.unitForProperty(k, v)) + ")";
+          transforms.push(v);
+        } else {
+          vString = v + "";
+          match = vString.match(/([-0-9.]*)(.*)/);
+          value = parseFloat(match[1]);
+          unit = match[2];
+          newProperties[k] = {
+            value: value,
+            originalValue: v,
+            unit: unit
+          };
+        }
+      }
+      if (transforms.length > 0) {
+        transform = transforms.join(' ');
+        newProperties['transform'] = {
+          value: Matrix.fromTransform(Matrix.transformStringToMatrixString(transform)).decompose(),
+          originalValue: transform,
+          unit: ''
+        };
+      }
+      newFrames[percent] = newProperties;
+    }
+    return newFrames;
+  };
+
+  keysForTransform = function(transform) {
+    var keys, match, matches, _i, _len;
+    matches = transform.match(/[a-zA-Z0-9]*\([^)]*\)/g);
+    keys = [];
+    if (matches != null) {
+      for (_i = 0, _len = matches.length; _i < _len; _i++) {
+        match = matches[_i];
+        keys.push(match.substring(0, match.indexOf('(')));
+      }
+    }
+    return keys;
+  };
+
+  Animations = [];
+
+  hasCommonProperties = function(props1, props2) {
+    var k, v;
+    for (k in props1) {
+      v = props1[k];
+      if (props2[k] != null) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  stopAnimationsForEl = function(el, properties, except) {
+    var animation, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = Animations.length; _i < _len; _i++) {
+      animation = Animations[_i];
+      if (animation.el === el && hasCommonProperties(animation.to, properties) && animation !== except) {
+        _results.push(animation.stop());
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  Animation = (function() {
+    function Animation(el, to, options) {
+      var animation, k, key, pos, redraw, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+      this.el = el;
+      this.to = to;
+      if (options == null) {
+        options = {};
+      }
+      this.stop = __bind(this.stop, this);
+      this.start = __bind(this.start, this);
+      this.dynamic = __bind(this.dynamic, this);
+      this.setOptions = __bind(this.setOptions, this);
+      if (window['jQuery'] && this.el instanceof jQuery) {
+        this.el = this.el[0];
+      }
+      this.animating = false;
+      redraw = this.el.offsetHeight;
+      this.frames = parseFrames({
+        0: getFirstFrame.call(this, this.to),
+        100: this.to
+      });
+      this.keysToInterpolate = [];
+      for (k in this.frames[100]) {
+        if (k !== 'transform') {
+          this.keysToInterpolate.push(k.toLowerCase());
+        }
+      }
+      if (this.frames[100]['transform'] != null) {
+        _ref = keysForTransform(this.frames[100]['transform'].originalValue);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          k = _ref[_i];
+          this.keysToInterpolate.push(k);
+        }
+        this.keysToInterpolate = this.keysToInterpolate.map(function(e) {
+          return e.toLowerCase();
+        });
+      }
+      for (_j = 0, _len1 = Animations.length; _j < _len1; _j++) {
+        animation = Animations[_j];
+        if (animation.el !== this.el) {
+          continue;
+        }
+        _ref1 = this.keysToInterpolate;
+        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+          key = _ref1[_k];
+          pos = animation.keysToInterpolate.indexOf(key);
+          if (pos === -1) {
+            continue;
+          }
+          animation.keysToInterpolate.splice(pos, 1);
+        }
+      }
+      this.setOptions(options);
+      if (this.options.debugName && Dynamics.InteractivePanel) {
+        Dynamics.InteractivePanel.addAnimation(this);
+      }
+      Animations.push(this);
+    }
+
+    Animation.prototype.setOptions = function(options) {
+      var _base, _base1, _base2, _base3;
+      if (options == null) {
+        options = {};
+      }
+      this.options = options;
+      if ((_base = this.options).duration == null) {
+        _base.duration = 1000;
+      }
+      if ((_base1 = this.options).complete == null) {
+        _base1.complete = null;
+      }
+      if ((_base2 = this.options).type == null) {
+        _base2.type = dynamics.Linear;
+      }
+      if ((_base3 = this.options).animated == null) {
+        _base3.animated = true;
+      }
+      if ((this.options.debugName != null) && (Dynamics.Overrides != null) && Dynamics.Overrides["for"](this.options.debugName)) {
+        this.options = Dynamics.Overrides.getOverride(this.options, this.options.debugName);
+      }
+      this.tween = new Tween(this.options);
+      this.tween.animation = this;
+      this.dynamic().init();
+      return this.returnsToSelf = false || this.dynamic().returnsToSelf;
+    };
+
+    Animation.prototype.dynamic = function() {
+      return this.tween.dynamic;
+    };
+
+    Animation.prototype.start = function(options) {
+      if (options == null) {
+        options = {};
+      }
+      if (options.delay == null) {
+        options.delay = this.options.delay;
+      }
+      if (options.delay == null) {
+        options.delay = 0;
+      }
+      stopAnimationsForEl(this.el, this.to, this);
+      if (options.delay <= 0) {
+        return this.tween.start();
+      } else {
+        return setTimeout(this.tween.start.bind(this.tween), options.delay);
+      }
+    };
+
+    Animation.prototype.stop = function() {
+      var _ref;
+      if ((_ref = this.tween) != null) {
+        _ref.stop();
+      }
+      this.animating = false;
+      return this.stopped = true;
+    };
+
+    return Animation;
+
+  })();
+
+  module.exports = Animation;
 
 }).call(this);
 ;}});
@@ -1208,6 +1224,9 @@ this.require.define({"loop":function(exports, require, module){(function() {
       }
     },
     remove: function(tween) {
+      if (this.tweens.indexOf(tween) === -1) {
+        return;
+      }
       return this.tweensToRemoveAtNextTick.push(tween);
     },
     removeUselessTweens: function() {
@@ -1215,7 +1234,9 @@ this.require.define({"loop":function(exports, require, module){(function() {
       _ref = this.tweensToRemoveAtNextTick;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         tween = _ref[_i];
-        this.tweens.splice(this.tweens.indexOf(tween), 1);
+        if (this.tweens.indexOf(tween) !== -1) {
+          this.tweens.splice(this.tweens.indexOf(tween), 1);
+        }
       }
       this.tweensToRemoveAtNextTick = [];
       if (this.running && this.tweens.length === 0) {
@@ -1752,6 +1773,7 @@ this.require.define({"tween":function(exports, require, module){(function() {
       this.stop = __bind(this.stop, this);
       this.start = __bind(this.start, this);
       this.dynamic = new this.options.type(this.options);
+      this.value = 0;
     }
 
     Tween.prototype.start = function() {
