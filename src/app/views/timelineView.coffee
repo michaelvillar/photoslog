@@ -28,11 +28,11 @@ class TimelineView extends View
     @selectedGroup = null
 
     window.addEventListener('resize', @onResize)
-    setTimeout =>
+    window.addEventListener('load', =>
       @updateCanvasSize()
       @center()
       @redraw()
-    , 100
+    )
 
   setVisibleGroups: (groups) =>
     groups.sort (a, b) ->
