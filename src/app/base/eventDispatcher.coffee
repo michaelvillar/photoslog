@@ -1,5 +1,7 @@
 Module = require('module')
 
+shouldNotTrigger = false
+
 class EventDispatcher extends Module
   constructor: ->
     @eventCallbacks = {}
@@ -18,7 +20,7 @@ class EventDispatcher extends Module
         cb if cb != callback
 
   trigger: (eventName, args...) =>
-    tracker.trace.trigger eventName, args
+    return if shouldNotTrigger
     callbacks = @eventCallbacks[eventName]
     return unless callbacks?
     callbacks = callbacks.slice()
@@ -35,5 +37,10 @@ class EventDispatcher extends Module
     source.on(event, (args...) =>
       @trigger(event, args...)
       )
+
+  dontTrigger: (fn) =>
+    shouldNotTrigger = true
+    fn()
+    shouldNotTrigger = false
 
 module.exports = EventDispatcher

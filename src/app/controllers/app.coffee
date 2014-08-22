@@ -1,7 +1,7 @@
 Controller = require('controller')
 View = require('view')
 Timeline = require('timeline')
-get = require('get')
+router = require('router')
 
 class App extends Controller
   constructor: ->
@@ -10,5 +10,17 @@ class App extends Controller
     @view = new View({ el: document.body, className: 'appView' })
     @timeline = new Timeline
     @view.addSubview(@timeline.view)
+
+    @bindEvents()
+
+  bindEvents: =>
+    router.on('change', @onRouterChange)
+
+  # Events
+  onRouterChange: (state) =>
+    if state?.type == 'group'
+      @timeline.setSelectedGroup(state.obj)
+    else
+      @timeline.setSelectedGroup(null)
 
 module.exports = App

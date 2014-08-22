@@ -39,31 +39,39 @@ class TimelineView extends View
       a.rect.y > b.rect.y
     @visibleGroups = groups
 
-    @selectedGroup = null
+    selectedGroup = null
     maxPortion = 0
     maxGroup = null
     for group in groups
       if group.portion > 0.66
-        @selectedGroup = group.group
+        selectedGroup = group.group
         break
 
       if group.portion > maxPortion
         maxPortion = group.portion
         maxGroup = group.group
 
-    @selectedGroup = maxGroup if !@selectedGroup
+    selectedGroup = maxGroup if !selectedGroup
 
-    if @selectedGroup
-      item = @itemForGroup(@selectedGroup)
-      if item and item != @selectedItem
+    if @selectedGroup != selectedGroup
+      @setSelectedGroup(selectedGroup)
+      @trigger('selectedGroupDidChange', selectedGroup)
+
+    @redraw()
+
+  setSelectedGroup: (group) =>
+    if @selectedGroup != group
+      @selectedGroup = group
+
+      if @selectedGroup
+        item = @itemForGroup(@selectedGroup)
+        if item and item != @selectedItem
+          @selectedItem?.el.classList.remove('selected')
+          item.el.classList.add('selected')
+          @selectedItem = item
+      else
         @selectedItem?.el.classList.remove('selected')
-        item.el.classList.add('selected')
-        @selectedItem = item
-    else
-      @selectedItem?.el.classList.remove('selected')
-      @selectedItem = null
-
-    @draw(@ctx)
+        @selectedItem = null
 
   setGroups: (groups) =>
     currentYear = null
@@ -74,35 +82,39 @@ class TimelineView extends View
       @containerView.addSubview(yearView)
 
     for group in groups
-      itemView = new View(tag: 'a', group: group)
+      do (group) =>
+        itemView = new View(tag: 'a', group: group)
+        itemView.el.addEventListener('click', =>
+          @trigger('click', group)
+        )
 
-      textView = new View(tag: 'span', className: 'textView')
-      textView.text(group.name)
-      itemView.addSubview(textView)
+        textView = new View(tag: 'span', className: 'textView')
+        textView.text(group.name)
+        itemView.addSubview(textView)
 
-      dateView = new View(tag: 'span', className: 'dateView')
+        dateView = new View(tag: 'span', className: 'dateView')
 
-      date = new Date(group.date)
-      monthString = months[date.getMonth()].toUpperCase()
+        date = new Date(group.date)
+        monthString = months[date.getMonth()].toUpperCase()
 
-      dateView.text("#{monthString} #{date.getFullYear()}")
-      itemView.addSubview(dateView)
+        dateView.text("#{monthString} #{date.getFullYear()}")
+        itemView.addSubview(dateView)
 
-      circleView = new View(tag: 'span', className: 'circleView')
-      itemView.addSubview(circleView)
+        circleView = new View(tag: 'span', className: 'circleView')
+        itemView.addSubview(circleView)
 
-      @containerView.addSubview(itemView)
+        @containerView.addSubview(itemView)
 
-      if currentYear? and currentYear != date.getFullYear()
-        addYearView(currentYear)
+        if currentYear? and currentYear != date.getFullYear()
+          addYearView(currentYear)
 
-      currentYear = date.getFullYear()
+        currentYear = date.getFullYear()
 
     addYearView(currentYear) if currentYear?
 
   itemForGroup: (group) =>
     for view in @containerView.subviews
-      return view if view.options.group == group
+      return view if view.options.group.path == group.path
     null
 
   updateCanvasSize: =>

@@ -21,4 +21,16 @@ class PhotosGroupsView extends View
         })
     visibleGroups
 
+  groupViewY: (group) =>
+    view = @viewForGroup(group)
+    if view?
+      view.y() - 45
+    else
+      0
+
+  # Private
+  viewForGroup: (group) =>
+    for view in @subviews
+      return view if view.options.group.path == group?.path
+
 module.exports = PhotosGroupsView
