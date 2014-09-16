@@ -2,20 +2,20 @@
   margin: 0
   padding: 0
   font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif
+  user-select: none
+  -webkit-user-select: none
 }
 
-.appView {
-  .timelineView {
-    position: fixed
-    top: 0
-    left: 50%
-    bottom: 0
-    margin-left: -400px
-  }
-
-  .photosGroupsView {
-    position: absolute
-    left: 50%
-    margin-left: -110px
-  }
+:root {
+  overflow: hidden
+  background: black
+  height: 100%
 }
+
+body, html {
+  overflow: hidden
+}
+
+html,body {height:100%; overflow:hidden}
+
+body {position: relative}

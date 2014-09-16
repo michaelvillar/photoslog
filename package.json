@@ -1,5 +1,5 @@
 {
-  "name" : "PhotoLog",
+  "name" : "mobile-dashboard-prototype",
   "version" : "0.0.1",
   "dependencies" : {
     "coffee-script": "1.x.x",
