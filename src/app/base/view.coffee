@@ -1,5 +1,5 @@
 EventDispatcher = require('eventDispatcher')
-require('dynamics.js')
+scroll = require('scroll')
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
@@ -13,8 +13,8 @@ getOffset = (el, property) ->
 
 convertCoordinateToScreen = (coordinates) ->
   obj = clone(coordinates)
-  obj.x = coordinates.x - window.scrollX
-  obj.y = coordinates.y - window.scorllY
+  obj.x = coordinates.x - scroll.value.x
+  obj.y = coordinates.y - scroll.value.y
   obj
 
 getWindowSize = do ->
@@ -45,7 +45,6 @@ class View extends EventDispatcher
 
     className = @className || @options.className
     @el.classList.add(className) if className?
-    @del = dynamic(@el)
 
     @subviews = []
 
@@ -60,9 +59,6 @@ class View extends EventDispatcher
   addSubviews: (subviews = []) =>
     for subview in subviews
       @addSubview(subview)
-
-  detach: =>
-    @el.parentNode?.removeChild(@el)
 
   text: (text) =>
     @el.innerHTML = text

@@ -1,0 +1,24 @@
+.photosGroupView {
+  width: 380px
+  line-height: 0
+
+  > .image {
+    display: inline-block
+    background-repeat: no-repeat
+    background-size: cover
+    background-position: center center
+    background-color: rgba(0, 0, 0, .2)
+
+    &.full {
+      width: 380px
+      margin-bottom: 7px
+    }
+
+    &.row {
+      margin-bottom: 7px
+      &:not(:last-child) {
+        margin-right: 7px
+      }
+    }
+  }
+}
