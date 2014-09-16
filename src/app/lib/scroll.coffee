@@ -37,6 +37,7 @@ scroll.to = (options = {}) ->
     dynamicObj = null
 
   scroll.scrolling = true
+  scroll.animated
   body = document.body
   html = document.documentElement
 

@@ -19,11 +19,14 @@ class Timeline extends Controller
     @view.addSubview(@photosGroupsView)
 
     get '/data/info.json', (data) =>
-      groups = data.groups.reverse()
+      @groups = data.groups.reverse()
 
-      @photosGroupsView.setGroups(groups)
-      @timelineView.setGroups(groups)
-      @updateVisibleGroups()
+      @photosGroupsView.setGroups(@groups)
+      @timelineView.setGroups(@groups)
+      if router.state?.type == 'group'
+        @setSelectedGroup(router.state.obj, { animated: false })
+      else
+        @updateVisibleGroups()
 
     @bindEvents()
 
@@ -32,17 +35,24 @@ class Timeline extends Controller
     @timelineView.on('selectedGroupDidChange', @onSelectedGroupDidChange)
     scroll.on('change', @onScroll)
 
-  setSelectedGroup: (group) =>
+  setSelectedGroup: (path, options = {}) =>
+    options.animated ?= true
+    group = @groupFromPath(path)
     @timelineView.setSelectedGroup(group)
     scroll.to(
       y: @photosGroupsView.groupViewY(group),
-      views: [@photosGroupsView]
+      views: [@photosGroupsView],
+      animated: options.animated
     )
     @onScroll()
 
   scrollToSelectedGroup: =>
 
   # Private
+  groupFromPath: (path) =>
+    for group in @groups
+      return group if group.path == path
+
   updateVisibleGroups: =>
     @timelineView.setVisibleGroups(@photosGroupsView.visibleGroups())
 
