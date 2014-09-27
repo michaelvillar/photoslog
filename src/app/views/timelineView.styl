@@ -20,7 +20,7 @@
     height: calc(200% - 36px)
     width: 1px
     background: #B0B0B0
-    transform: scale(.5)
+    transform: scale(.5) translateZ(0px)
     transform-origin: 0 0
   }
 
@@ -52,7 +52,7 @@
       > span {
         display: inline-block
         vertical-align: top
-        transform: scale(.5)
+        transform: scale(.5) translateZ(0px)
         transition: all .15s ease-in-out
       }
 
@@ -97,14 +97,14 @@
 
         > .circleView {
           border-color: #000
-          transform: scale(.55)
+          transform: scale(.55) translateZ(0px)
         }
       }
 
       &.selected {
         > .textView {
           color: #0091FF
-          transform: scale(.75) translateY(-7px)
+          transform: scale(.75) translateY(-7px) translateZ(0px)
         }
 
         > .dateView {
@@ -114,7 +114,7 @@
 
         > .circleView {
           border-color: #0091FF
-          transform: scale(.75)
+          transform: scale(.75) translateZ(0px)
         }
       }
     }
