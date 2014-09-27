@@ -104,7 +104,7 @@ processTimelineImage = (group, image) ->
   dstPath = DST + group.path
   files = []
   resizeImage(srcFile, dstPath, {
-    width: 380
+    width: 750
   }, {
     suffix: '_timeline'
   }).then((filenames) ->

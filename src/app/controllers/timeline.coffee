@@ -10,13 +10,16 @@ class Timeline extends Controller
   constructor: ->
     super
 
-    @view = new View
+    @view = new View(className: 'mainView')
 
     @timelineView = new TimelineView
     @view.addSubview(@timelineView)
 
+    @photosGroupsContainerView = new View(className: 'photosGroupsContainerView')
     @photosGroupsView = new PhotosGroupsView
-    @view.addSubview(@photosGroupsView)
+
+    @photosGroupsContainerView.addSubview(@photosGroupsView)
+    @view.addSubview(@photosGroupsContainerView)
 
     get '/data/info.json', (data) =>
       @groups = data.groups.reverse()

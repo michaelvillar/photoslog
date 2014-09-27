@@ -4,32 +4,55 @@
   font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif
 }
 
-.appView {
+html, body {
+  height: 100%
+}
+
+.mainView {
   .timelineView {
     position: fixed
     top: 0
-    left: 50%
+    left: 0
     bottom: 0
-    margin-left: -400px
   }
 
-  .photosGroupsView {
+  .photosGroupsContainerView {
     position: absolute
-    left: 50%
-    margin-left: -110px
+    left: 290px
+    width: calc(100% - 280px)
+    max-width: 60%
+
+    .photosGroupsView {
+      max-width: 750px
+    }
   }
 }
 
-@media all and (max-width: 720px) {
-  .appView {
+@media all and (min-width: 1250px) {
+  .mainView {
+    .timelineView {
+      left: calc((100% - 1250px) / 2)
+    }
+
+    .photosGroupsContainerView {
+      left: calc((100% - 1250px) / 2 + 290px)
+      width: 750px
+    }
+  }
+}
+
+@media all and (max-width: 750px) {
+  .mainView {
     .timelineView {
       display: none
     }
 
-    .photosGroupsView {
+    .photosGroupsContainerView {
       position: static
       left: 0
-      margin-left: auto
+      margin-left: 7px
+      width: calc(100% - 14px)
+      max-width: 100%
     }
   }
 }
