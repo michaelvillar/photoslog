@@ -9,6 +9,7 @@
     "stylus": "0.x.x",
     "q": "1.x.x",
     "q-io": "1.x.x",
+    "express": "4.x.x",
     "lodash": "2.x.x"
   }
 }
