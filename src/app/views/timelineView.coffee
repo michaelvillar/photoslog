@@ -139,10 +139,18 @@ class TimelineView extends View
 
     canvasWidth = @canvas.el.width / pixelRatio
     canvasHeight = @canvas.el.height / pixelRatio
-    ctx.clearRect(0, 0, canvasWidth * pixelRatio, canvasHeight * pixelRatio)
 
-    return if !@visibleGroups? or @visibleGroups.length == 0
+    ctx.fillStyle = 'white'
+    if @lastDrawnRect?
+      ctx.fillRect.apply(ctx, @lastDrawnRect)
+    else
+      ctx.fillRect(0, 0, canvasWidth * pixelRatio, canvasHeight * pixelRatio)
 
+    if !@visibleGroups? or @visibleGroups.length == 0
+      @lastDrawnRect = [0,0,0,0]
+      return
+
+    fullRect = null
     for group in @visibleGroups
       item = @itemForGroup(group.group)
       continue unless item?
@@ -157,7 +165,22 @@ class TimelineView extends View
         ctx.strokeStyle = "rgba(176, 176, 176, #{Math.min(1, group.portion * 4)})"
         ctx.lineWidth = '1'
 
-      @drawLine(ctx, { x: 0, y: itemRect.y + itemRect.height / 2 }, { x: 95, y: groupRect.y + groupRect.height / 2 })
+      y1 = itemRect.y + itemRect.height / 2
+      y2 = groupRect.y + groupRect.height / 2
+      minY = Math.min(y1, y2) - 5
+      maxY = Math.max(y1, y2) + 5
+      rect = [0, minY * pixelRatio, 95 * pixelRatio, (maxY - minY) * pixelRatio ]
+
+      if fullRect?
+        newHeight = Math.max(fullRect[3] + fullRect[1], rect[3] + rect[1]) - Math.min(fullRect[1], rect[1])
+        minY = Math.min(fullRect[1], rect[1])
+        fullRect = [fullRect[0], minY, rect[2], newHeight]
+      else
+        fullRect = rect
+
+      @drawLine(ctx, { x: 0, y: y1 }, { x: 95, y: y2 })
+
+    @lastDrawnRect = fullRect
 
   drawLine: (ctx, from, to) =>
     from = multiply(from, pixelRatio)
