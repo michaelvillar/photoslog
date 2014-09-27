@@ -134,6 +134,9 @@ class TimelineView extends View
       @draw(@ctx)
 
   draw: (ctx) =>
+    if !@isVisible()
+      return
+
     canvasWidth = @canvas.el.width / pixelRatio
     canvasHeight = @canvas.el.height / pixelRatio
     ctx.clearRect(0, 0, canvasWidth * pixelRatio, canvasHeight * pixelRatio)

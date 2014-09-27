@@ -102,4 +102,8 @@ class View extends EventDispatcher
     windowFrame.y = 0
     getRectsIntersection(viewFrameInScreen, windowFrame)
 
+  isVisible: =>
+    style = window.getComputedStyle(@el)
+    style.display != 'none' and style.visibility != 'hidden'
+
 module.exports = View
