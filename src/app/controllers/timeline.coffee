@@ -21,21 +21,16 @@ class Timeline extends Controller
     @photosGroupsContainerView.addSubview(@photosGroupsView)
     @view.addSubview(@photosGroupsContainerView)
 
-    get '/data/info.json', (data) =>
-      @groups = data.groups.reverse()
-
-      @photosGroupsView.setGroups(@groups)
-      @timelineView.setGroups(@groups)
-      if router.state?.type == 'group'
-        @setSelectedGroup(router.state.obj, { animated: false })
-      else
-        @updateVisibleGroups()
-
+    @load()
     @bindEvents()
+
+  load: =>
+    get '/data/info.json', @onLoad
 
   bindEvents: =>
     @timelineView.on('click', @onClick)
     @timelineView.on('selectedGroupDidChange', @onSelectedGroupDidChange)
+    @photosGroupsView.on('click', @onPhotoClick)
     scroll.on('change', @onScroll)
 
   setSelectedGroup: (path, options = {}) =>
@@ -60,6 +55,16 @@ class Timeline extends Controller
     @timelineView.setVisibleGroups(@photosGroupsView.visibleGroups())
 
   # Events
+  onLoad: (data) =>
+    @groups = data.groups.reverse()
+
+    @photosGroupsView.setGroups(@groups)
+    @timelineView.setGroups(@groups)
+    if router.state?.type == 'group'
+      @setSelectedGroup(router.state.obj, { animated: false })
+    else
+      @updateVisibleGroups()
+
   onScroll: =>
     requestAnimationFrame =>
       @updateVisibleGroups()
@@ -70,5 +75,8 @@ class Timeline extends Controller
   onSelectedGroupDidChange: (group) =>
     return if scroll.scrolling
     router.goToGroup(group, { trigger: false })
+
+  onPhotoClick: (photosGroupView, image) =>
+    console.log image
 
 module.exports = Timeline

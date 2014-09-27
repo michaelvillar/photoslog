@@ -55,7 +55,13 @@ class PhotosGroupView extends View
 
   createImageView: (image) =>
     filePath = ["/data", @options.group.path, image.files[ratio]].join('/')
-    imageView = new ImageView(className: image.type, queue: @options.queue, imagePath: filePath)
+    imageView = new ImageView(
+      className: image.type,
+      queue: @options.queue,
+      imagePath: filePath,
+      object: image
+    )
+    imageView.on('click', @onClick)
     imageView
 
   invalidate: =>
@@ -65,5 +71,8 @@ class PhotosGroupView extends View
     if !@cachedFrame
       @cachedFrame = super
     @cachedFrame
+
+  onClick: (imageView) =>
+    @trigger('click', @, imageView.options.object)
 
 module.exports = PhotosGroupView

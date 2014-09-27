@@ -11,6 +11,11 @@ class ImageView extends View
     else
       @load()
 
+    @bindEvents()
+
+  bindEvents: =>
+    @el.addEventListener('click', @onClick)
+
   load: (done) =>
     @image = new Image
     @image.src = @options.imagePath
@@ -20,5 +25,8 @@ class ImageView extends View
 
   onLoad: =>
     @el.style.backgroundImage = "url(#{@options.imagePath})"
+
+  onClick: =>
+    @trigger('click', @)
 
 module.exports = ImageView

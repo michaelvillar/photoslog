@@ -13,6 +13,7 @@ class PhotosGroupsView extends View
   setGroups: (groups) =>
     for group in groups
       photosGroupView = new PhotosGroupView(group: group, queue: @queue)
+      photosGroupView.on('click', @onClick)
       @addSubview(photosGroupView)
 
   visibleGroups: =>
@@ -38,5 +39,9 @@ class PhotosGroupsView extends View
   viewForGroup: (group) =>
     for view in @subviews
       return view if view.options.group.path == group?.path
+
+  # Events
+  onClick: (photosGroupView, image) =>
+    @trigger('click', @, image)
 
 module.exports = PhotosGroupsView

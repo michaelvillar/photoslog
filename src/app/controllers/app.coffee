@@ -1,6 +1,7 @@
 Controller = require('controller')
 View = require('view')
 Timeline = require('timeline')
+Fullscreen = require('fullscreen')
 router = require('router')
 
 class App extends Controller
@@ -8,8 +9,12 @@ class App extends Controller
     super
 
     @view = new View({ el: document.body, className: 'appView' })
+
     @timeline = new Timeline
     @view.addSubview(@timeline.view)
+
+    @fullscreen = new Fullscreen
+    @view.addSubview(@fullscreen.view)
 
     @bindEvents()
 
