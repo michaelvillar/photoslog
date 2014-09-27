@@ -1,12 +1,18 @@
 View = require('view')
 PhotosGroupView = require('photosGroupView')
+Queue = require('queue')
 
 class PhotosGroupsView extends View
   className: 'photosGroupsView'
 
+  constructor: ->
+    super
+
+    @queue = new Queue
+
   setGroups: (groups) =>
     for group in groups
-      photosGroupView = new PhotosGroupView({ group: group })
+      photosGroupView = new PhotosGroupView(group: group, queue: @queue)
       @addSubview(photosGroupView)
 
   visibleGroups: =>

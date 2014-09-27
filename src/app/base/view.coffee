@@ -43,8 +43,9 @@ class View extends EventDispatcher
     super
     @el = @el or @options.el or document.createElement(@options['tag'] || @tag)
 
-    className = @className || @options.className
-    @el.classList.add(className) if className?
+    for className in [@className, @options.className]
+      for c in (className ? '').split(' ')
+        @el.classList.add(c) if c != ''
 
     @subviews = []
 

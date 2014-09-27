@@ -1,4 +1,5 @@
 View = require('view')
+ImageView = require('imageView')
 
 pixelRatio = window.devicePixelRatio ? 1
 pixelRatio = {1:1, 2:2}[pixelRatio] ? 1
@@ -18,7 +19,7 @@ class PhotosGroupView extends View
 
   appendFullImage: (image) =>
     @fullImage = image
-    image.view = new View(el: @createImage(image))
+    image.view = @createImageView(image)
     @addSubview(image.view)
 
   appendRowImages: (images) =>
@@ -36,7 +37,7 @@ class PhotosGroupView extends View
 
     # Render
     for i, image of @images
-      image.view = new View(el: @createImage(image))
+      image.view = @createImageView(image)
       @addSubview(image.view)
       image.view.el.style.width = "calc((100% - #{margins}px) * #{image.layout.widthPercent})"
 
@@ -52,12 +53,10 @@ class PhotosGroupView extends View
 
     @fullImage.view.el.style.height = "#{@fullImage.size.height / @fullImage.size.width * @fullImage.view.width()}px"
 
-  createImage: (image) =>
-    img = document.createElement('div')
-    img.classList.add('image')
-    img.classList.add(image.type)
-    img.style.backgroundImage = "url(" + ["/data", @options.group.path, image.files[ratio]].join('/') + ")"
-    img
+  createImageView: (image) =>
+    filePath = ["/data", @options.group.path, image.files[ratio]].join('/')
+    imageView = new ImageView(className: image.type, queue: @options.queue, imagePath: filePath)
+    imageView
 
   invalidate: =>
     @cachedFrame = null
