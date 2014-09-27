@@ -13,39 +13,44 @@ class PhotosGroupView extends View
 
   bindEvents: =>
     window.addEventListener('resize', @invalidate)
+    window.addEventListener('resize', @layout)
+    @on('addedToDOM', @layout)
 
   appendFullImage: (image) =>
-    img = @createImage(image)
-    img.style.height = "#{image.size.height}px"
-    @el.appendChild(img)
+    @fullImage = image
+    image.view = new View(el: @createImage(image))
+    @addSubview(image.view)
 
   appendRowImages: (images) =>
-    margins = (images.length - 1) * 7
-
-    width = 380 - margins
+    @images = images
+    margins = (@images.length - 1) * 7
 
     totalWidthAt1000 = 0
     # Process ratios
-    for image in images
+    for image in @images
       image.ratio = image.size.width / image.size.height
       totalWidthAt1000 += 1000 * image.ratio
-    for image in images
+    for image in @images
       image.layout =
         widthPercent: 1000 * image.ratio / totalWidthAt1000
 
-    image = images[0]
-    height = Math.round(width * image.layout.widthPercent / image.ratio)
+    # Render
+    for i, image of @images
+      image.view = new View(el: @createImage(image))
+      @addSubview(image.view)
+      image.view.el.style.width = "calc((100% - #{margins}px) * #{image.layout.widthPercent})"
+
+  layout: =>
+    return if !@images[0].view.width()
+
+    margins = (@images.length - 1) * 7
 
     # Layout
-    for i, image of images
-      w = Math.round(height * image.ratio)
-      w = width if parseInt(i) == images.length - 1
-      width -= w
+    height = @images[0].view.width() / @images[0].ratio
+    for i, image of @images
+      image.view.el.style.height = "#{height}px"
 
-      img = @createImage(image)
-      img.style.width = "#{w}px"
-      img.style.height = "#{height}px"
-      @el.appendChild(img)
+    @fullImage.view.el.style.height = "#{@fullImage.size.height / @fullImage.size.width * @fullImage.view.width()}px"
 
   createImage: (image) =>
     img = document.createElement('div')

@@ -54,11 +54,17 @@ class View extends EventDispatcher
 
   addSubview: (subview) =>
     @el.appendChild(subview.el)
+    subview.setSuperview(@)
     @subviews.push(subview)
 
   addSubviews: (subviews = []) =>
     for subview in subviews
       @addSubview(subview)
+
+  setSuperview: (superview) =>
+    @superview = superview
+    if @el.parentNode?
+      @triggerToSubviews('addedToDOM')
 
   text: (text) =>
     @el.innerHTML = text
