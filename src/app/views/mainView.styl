@@ -1,0 +1,48 @@
+.mainView {
+  .timelineView {
+    position: fixed
+    top: 0
+    left: 0
+    bottom: 0
+  }
+
+  .photosGroupsContainerView {
+    position: absolute
+    left: 290px
+    width: calc(100% - 280px)
+    max-width: 60%
+
+    .photosGroupsView {
+      max-width: 750px
+    }
+  }
+}
+
+@media all and (min-width: 1250px) {
+  .mainView {
+    .timelineView {
+      left: calc((100% - 1250px) / 2)
+    }
+
+    .photosGroupsContainerView {
+      left: calc((100% - 1250px) / 2 + 290px)
+      width: 750px
+    }
+  }
+}
+
+@media all and (max-width: 750px) {
+  .mainView {
+    .timelineView {
+      display: none
+    }
+
+    .photosGroupsContainerView {
+      position: static
+      left: 0
+      margin-left: 7px
+      width: calc(100% - 14px)
+      max-width: 100%
+    }
+  }
+}
