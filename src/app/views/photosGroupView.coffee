@@ -58,7 +58,6 @@ class PhotosGroupView extends View
       imagePath: filePath,
       object: image
     )
-    imageView.on('click', @onClick)
     imageView
 
   invalidate: =>
@@ -68,8 +67,5 @@ class PhotosGroupView extends View
     if !@cachedFrame
       @cachedFrame = super
     @cachedFrame
-
-  onClick: (imageView) =>
-    @trigger('click', @, imageView, imageView.options.object)
 
 module.exports = PhotosGroupView
