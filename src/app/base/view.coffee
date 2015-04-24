@@ -1,5 +1,6 @@
 EventDispatcher = require('eventDispatcher')
 scroll = require('scroll')
+require('dynamics.js')
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
@@ -106,5 +107,13 @@ class View extends EventDispatcher
   isVisible: =>
     style = window.getComputedStyle(@el)
     style.display != 'none' and style.visibility != 'hidden'
+
+  css: =>
+    args = Array.prototype.slice.call(arguments)
+    dynamics.css.apply(dynamics, [@el].concat(args))
+
+  animate: =>
+    args = Array.prototype.slice.call(arguments)
+    dynamics.apply(dynamics, [@el].concat(args))
 
 module.exports = View

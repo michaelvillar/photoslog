@@ -41,7 +41,7 @@ class PhotosGroupsView extends View
       return view if view.options.group.path == group?.path
 
   # Events
-  onClick: (photosGroupView, image) =>
-    @trigger('click', @, image)
+  onClick: (photosGroupView, view, image) =>
+    @trigger('click', @, view, image)
 
 module.exports = PhotosGroupsView

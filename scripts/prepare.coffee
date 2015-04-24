@@ -86,10 +86,10 @@ createTimeline = (groups) ->
         for i in [0..Math.min(2, images.length - 1)]
           image = images[i]
           group.images.push(image)
-          do (image) ->
+          do (group, image) ->
             processTimelineImage(group, image).then((args) ->
               delete image.file
-              image.files = args.files
+              image.files = _.mapValues(args.files, (file) -> "/data/#{group.path}#{file}" )
               image.size =
                 width: args.info.width
                 height: args.info.height

@@ -19,6 +19,7 @@ class App extends Controller
     @bindEvents()
 
   bindEvents: =>
+    @timeline.on('photoClick', @onPhotoClick)
     router.on('change', @onRouterChange)
 
   # Events
@@ -27,5 +28,10 @@ class App extends Controller
       @timeline.setSelectedGroup(state.obj)
     else
       @timeline.setSelectedGroup(null)
+
+  onPhotoClick: (timelineView, view, image) =>
+    @fullscreen.open(image, {
+      view: view
+    })
 
 module.exports = App

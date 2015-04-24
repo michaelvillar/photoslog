@@ -1,4 +1,4 @@
-window.dynamic = function() {
+window.dynamics = function() {
   (function() {
   if (!this.require) {
     var modules = {}, cache = {};
@@ -63,18 +63,90 @@ window.dynamic = function() {
 var require = this.require;
 
 
-this.require.define({"dynamics":function(exports, require, module){(function() {
-  var Bezier, Dynamic, EaseInOut, Gravity, GravityWithForce, Linear, SelfSpring, Spring, dynamics,
+this.require.define({"animation":function(exports, require, module){(function() {
+  var Animation, curves, helpers,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  curves = require('curves');
+
+  helpers = require('helpers');
+
+  Animation = (function() {
+    function Animation(currentStyle, properties, options) {
+      this.complete = __bind(this.complete, this);
+      this.change = __bind(this.change, this);
+      this.duration = __bind(this.duration, this);
+      this.timeLeft = __bind(this.timeLeft, this);
+      this.frame = __bind(this.frame, this);
+      var k, v;
+      this.currentStyle = {};
+      for (k in currentStyle) {
+        v = currentStyle[k];
+        this.currentStyle[k] = v;
+      }
+      this.properties = helpers.parseProperties(properties);
+      this.options = options;
+      this.curve = new this.options.type(this.options);
+      this.time = 0;
+    }
+
+    Animation.prototype.frame = function(ts) {
+      var current, frame, property, t, value, _ref;
+      this.time += ts;
+      t = this.time / this.duration();
+      if (t > 1) {
+        t = 1;
+      }
+      frame = {};
+      _ref = this.properties;
+      for (property in _ref) {
+        value = _ref[property];
+        current = this.currentStyle[property];
+        frame[property] = current + (this.curve.at(t)[1] * (value - current));
+      }
+      return frame;
+    };
+
+    Animation.prototype.timeLeft = function() {
+      return Math.max(0, this.duration() - this.time);
+    };
+
+    Animation.prototype.duration = function() {
+      return this.curve.options.duration;
+    };
+
+    Animation.prototype.change = function() {
+      var _base;
+      return typeof (_base = this.options).change === "function" ? _base.change() : void 0;
+    };
+
+    Animation.prototype.complete = function() {
+      var _base;
+      return typeof (_base = this.options).complete === "function" ? _base.complete() : void 0;
+    };
+
+    return Animation;
+
+  })();
+
+  module.exports = Animation;
+
+}).call(this);
+;}});
+
+
+this.require.define({"curves":function(exports, require, module){(function() {
+  var Bezier, Curve, CustomBezier, EaseIn, EaseInOut, EaseOut, Gravity, GravityWithForce, Linear, SelfSpring, Spring, curves,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  dynamics = {};
+  curves = {};
 
-  Dynamic = (function() {
-    Dynamic.properties = {};
+  Curve = (function() {
+    Curve.properties = {};
 
-    function Dynamic(options) {
+    function Curve(options) {
       var k, v, _ref;
       this.options = options != null ? options : {};
       this.next = __bind(this.next, this);
@@ -88,11 +160,11 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
       }
     }
 
-    Dynamic.prototype.init = function() {
+    Curve.prototype.init = function() {
       return this.t = 0;
     };
 
-    Dynamic.prototype.next = function(step) {
+    Curve.prototype.next = function(step) {
       var r;
       if (this.t > 1) {
         this.t = 1;
@@ -102,11 +174,15 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
       return r;
     };
 
-    Dynamic.prototype.at = function(t) {
+    Curve.prototype.editable = function() {
+      return false;
+    };
+
+    Curve.prototype.at = function(t) {
       return [t, t];
     };
 
-    return Dynamic;
+    return Curve;
 
   })();
 
@@ -131,7 +207,7 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
 
     return Linear;
 
-  })(Dynamic);
+  })(Curve);
 
   Gravity = (function(_super) {
     __extends(Gravity, _super);
@@ -275,7 +351,7 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
 
     return Gravity;
 
-  })(Dynamic);
+  })(Curve);
 
   GravityWithForce = (function(_super) {
     __extends(GravityWithForce, _super);
@@ -368,7 +444,7 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
 
     return Spring;
 
-  })(Dynamic);
+  })(Curve);
 
   SelfSpring = (function(_super) {
     __extends(SelfSpring, _super);
@@ -418,7 +494,7 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
 
     return SelfSpring;
 
-  })(Dynamic);
+  })(Curve);
 
   Bezier = (function(_super) {
     __extends(Bezier, _super);
@@ -475,6 +551,10 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
       this.returnsToSelf = this.options.points[this.options.points.length - 1].y === 0;
       Bezier.__super__.constructor.call(this, this.options);
     }
+
+    Bezier.prototype.editable = function() {
+      return true;
+    };
 
     Bezier.prototype.B_ = function(t, p0, p1, p2, p3) {
       return (Math.pow(1 - t, 3) * p0) + (3 * Math.pow(1 - t, 2) * t * p1) + (3 * (1 - t) * Math.pow(t, 2) * p2) + Math.pow(t, 3) * p3;
@@ -552,12 +632,12 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
 
     return Bezier;
 
-  })(Dynamic);
+  })(Curve);
 
-  EaseInOut = (function(_super) {
-    __extends(EaseInOut, _super);
+  CustomBezier = (function(_super) {
+    __extends(CustomBezier, _super);
 
-    EaseInOut.properties = {
+    CustomBezier.properties = {
       friction: {
         min: 1,
         max: 1000,
@@ -570,19 +650,44 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
       }
     };
 
-    function EaseInOut(options) {
-      var friction, points;
+    function CustomBezier(options) {
       this.options = options != null ? options : {};
       this.at = __bind(this.at, this);
-      EaseInOut.__super__.constructor.apply(this, arguments);
-      friction = this.options.friction || EaseInOut.properties.friction["default"];
-      points = [
+      CustomBezier.__super__.constructor.apply(this, arguments);
+      this.bezier = new Bezier({
+        type: Bezier,
+        duration: this.options.duration,
+        points: this.options.points
+      });
+    }
+
+    CustomBezier.prototype.editable = function() {
+      return false;
+    };
+
+    CustomBezier.prototype.at = function(t) {
+      return this.bezier.at(t);
+    };
+
+    return CustomBezier;
+
+  })(Bezier);
+
+  EaseInOut = (function(_super) {
+    __extends(EaseInOut, _super);
+
+    function EaseInOut(options) {
+      if (options == null) {
+        options = {};
+      }
+      options.friction = options.friction || EaseInOut.properties.friction["default"];
+      options.points = [
         {
           x: 0,
           y: 0,
           controlPoints: [
             {
-              x: 1 - (friction / 1000),
+              x: 0.92 - (options.friction / 1000),
               y: 0
             }
           ]
@@ -591,380 +696,110 @@ this.require.define({"dynamics":function(exports, require, module){(function() {
           y: 1,
           controlPoints: [
             {
-              x: friction / 1000,
+              x: 0.08 + (options.friction / 1000),
               y: 1
             }
           ]
         }
       ];
-      this.bezier = new Bezier({
-        type: Bezier,
-        duration: this.options.duration,
-        points: points
-      });
+      EaseInOut.__super__.constructor.call(this, options);
     }
-
-    EaseInOut.prototype.at = function(t) {
-      return this.bezier.at(t);
-    };
 
     return EaseInOut;
 
-  })(Dynamic);
+  })(CustomBezier);
 
-  dynamics.Spring = Spring;
+  EaseIn = (function(_super) {
+    __extends(EaseIn, _super);
 
-  dynamics.SelfSpring = SelfSpring;
-
-  dynamics.Gravity = Gravity;
-
-  dynamics.GravityWithForce = GravityWithForce;
-
-  dynamics.Linear = Linear;
-
-  dynamics.Bezier = Bezier;
-
-  dynamics.EaseInOut = EaseInOut;
-
-  module.exports = dynamics;
-
-}).call(this);
-;}});
-
-
-this.require.define({"element":function(exports, require, module){(function() {
-  var Animation, Element, helpers,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  Animation = require('animation');
-
-  helpers = require('helpers');
-
-  Element = (function() {
-    function Element(el) {
-      this.isAnimating = __bind(this.isAnimating, this);
-      this.delay = __bind(this.delay, this);
-      this.stop = __bind(this.stop, this);
-      this.start = __bind(this.start, this);
-      this.to = __bind(this.to, this);
-      this.css = __bind(this.css, this);
-      this.el = __bind(this.el, this);
-      this._el = el;
-      this._delay = 0;
-      this._animations = [];
-      this._runningAnimations = [];
-    }
-
-    Element.prototype.el = function() {
-      return this._el;
-    };
-
-    Element.prototype.css = function(properties) {
-      helpers.css(this._el, properties);
-      return this;
-    };
-
-    Element.prototype.to = function(to, options) {
-      var animation, oldComplete;
+    function EaseIn(options) {
       if (options == null) {
         options = {};
       }
-      animation = new Animation(this._el, to, options);
-      options.delay = this._delay;
-      oldComplete = options.complete;
-      options.complete = (function(_this) {
-        return function() {
-          _this._runningAnimations.splice(_this._runningAnimations.indexOf(animation), 1);
-          return oldComplete != null ? oldComplete.call(_this, _this, to, animation.options) : void 0;
-        };
-      })(this);
-      this._animations.push(animation);
-      return this;
-    };
-
-    Element.prototype.start = function() {
-      var animation, _i, _len, _ref;
-      _ref = this._animations;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        animation = _ref[_i];
-        this._runningAnimations.push(animation);
-        animation.start();
-      }
-      this._animations = [];
-      this._delay = 0;
-      return this;
-    };
-
-    Element.prototype.stop = function() {
-      var animation, _i, _len, _ref;
-      _ref = this._runningAnimations;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        animation = _ref[_i];
-        animation.stop();
-      }
-      this._runningAnimations = [];
-      return this;
-    };
-
-    Element.prototype.delay = function(delay) {
-      this._delay += delay;
-      return this;
-    };
-
-    Element.prototype.isAnimating = function() {
-      return this._runningAnimations.length > 0;
-    };
-
-    return Element;
-
-  })();
-
-  module.exports = Element;
-
-}).call(this);
-;}});
-
-
-this.require.define({"animation":function(exports, require, module){(function() {
-  var Animation, Animations, Matrix, Tween, dynamics, getFirstFrame, hasCommonProperties, helpers, keysForTransform, parseFrames, stopAnimationsForEl,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  Tween = require('tween');
-
-  helpers = require('helpers');
-
-  Matrix = require('matrix');
-
-  dynamics = require('dynamics');
-
-  getFirstFrame = function(properties) {
-    var frame, k, style, v, _ref;
-    frame = {};
-    if (this.el.style != null) {
-      style = window.getComputedStyle(this.el, null);
-      for (k in properties) {
-        if (helpers.transformProperties.contains(k)) {
-          k = 'transform';
+      options.friction = options.friction || EaseIn.properties.friction["default"];
+      options.points = [
+        {
+          x: 0,
+          y: 0,
+          controlPoints: [
+            {
+              x: 0.92 - (options.friction / 1000),
+              y: 0
+            }
+          ]
+        }, {
+          x: 1,
+          y: 1,
+          controlPoints: [
+            {
+              x: 1,
+              y: 1
+            }
+          ]
         }
-        if (!frame[k]) {
-          v = this.el.style[helpers.support.propertyWithPrefix(k)];
-          if (v == null) {
-            v = style[helpers.support.propertyWithPrefix(k)];
-          }
-          frame[k] = v;
-        }
-      }
-    } else {
-      _ref = this.el;
-      for (k in _ref) {
-        v = _ref[k];
-        frame[k] = v;
-      }
+      ];
+      EaseIn.__super__.constructor.call(this, options);
     }
-    return frame;
-  };
 
-  parseFrames = function(frames) {
-    var k, match, newFrames, newProperties, percent, properties, transform, transforms, unit, v, vString, value;
-    newFrames = {};
-    for (percent in frames) {
-      properties = frames[percent];
-      transforms = [];
-      newProperties = {};
-      for (k in properties) {
-        v = properties[k];
-        if (k === 'transform') {
-          transforms.push(v);
-        } else if (helpers.transformProperties.contains(k)) {
-          v = "" + k + "(" + v + (helpers.unitForProperty(k, v)) + ")";
-          transforms.push(v);
-        } else {
-          vString = v + "";
-          match = vString.match(/([-0-9.]*)(.*)/);
-          value = parseFloat(match[1]);
-          unit = match[2];
-          newProperties[k] = {
-            value: value,
-            originalValue: v,
-            unit: unit
-          };
-        }
-      }
-      if (transforms.length > 0) {
-        transform = transforms.join(' ');
-        newProperties['transform'] = {
-          value: Matrix.fromTransform(Matrix.transformStringToMatrixString(transform)).decompose(),
-          originalValue: transform,
-          unit: ''
-        };
-      }
-      newFrames[percent] = newProperties;
-    }
-    return newFrames;
-  };
+    return EaseIn;
 
-  keysForTransform = function(transform) {
-    var keys, match, matches, _i, _len;
-    matches = transform.match(/[a-zA-Z0-9]*\([^)]*\)/g);
-    keys = [];
-    if (matches != null) {
-      for (_i = 0, _len = matches.length; _i < _len; _i++) {
-        match = matches[_i];
-        keys.push(match.substring(0, match.indexOf('(')));
-      }
-    }
-    return keys;
-  };
+  })(CustomBezier);
 
-  Animations = [];
+  EaseOut = (function(_super) {
+    __extends(EaseOut, _super);
 
-  hasCommonProperties = function(props1, props2) {
-    var k, v;
-    for (k in props1) {
-      v = props1[k];
-      if (props2[k] != null) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  stopAnimationsForEl = function(el, properties, except) {
-    var animation, _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = Animations.length; _i < _len; _i++) {
-      animation = Animations[_i];
-      if (animation.el === el && hasCommonProperties(animation.to, properties) && animation !== except) {
-        _results.push(animation.stop());
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  Animation = (function() {
-    function Animation(el, to, options) {
-      var animation, k, key, pos, redraw, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
-      this.el = el;
-      this.to = to;
+    function EaseOut(options) {
       if (options == null) {
         options = {};
       }
-      this.stop = __bind(this.stop, this);
-      this.start = __bind(this.start, this);
-      this.dynamic = __bind(this.dynamic, this);
-      this.setOptions = __bind(this.setOptions, this);
-      if (window['jQuery'] && this.el instanceof jQuery) {
-        this.el = this.el[0];
-      }
-      this.animating = false;
-      redraw = this.el.offsetHeight;
-      this.frames = parseFrames({
-        0: getFirstFrame.call(this, this.to),
-        100: this.to
-      });
-      this.keysToInterpolate = [];
-      for (k in this.frames[100]) {
-        if (k !== 'transform') {
-          this.keysToInterpolate.push(k.toLowerCase());
+      options.friction = options.friction || EaseIn.properties.friction["default"];
+      options.points = [
+        {
+          x: 0,
+          y: 0,
+          controlPoints: [
+            {
+              x: 0,
+              y: 0
+            }
+          ]
+        }, {
+          x: 1,
+          y: 1,
+          controlPoints: [
+            {
+              x: 0.08 + (options.friction / 1000),
+              y: 1
+            }
+          ]
         }
-      }
-      if (this.frames[100]['transform'] != null) {
-        _ref = keysForTransform(this.frames[100]['transform'].originalValue);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          k = _ref[_i];
-          this.keysToInterpolate.push(k);
-        }
-        this.keysToInterpolate = this.keysToInterpolate.map(function(e) {
-          return e.toLowerCase();
-        });
-      }
-      for (_j = 0, _len1 = Animations.length; _j < _len1; _j++) {
-        animation = Animations[_j];
-        if (animation.el !== this.el) {
-          continue;
-        }
-        _ref1 = this.keysToInterpolate;
-        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-          key = _ref1[_k];
-          pos = animation.keysToInterpolate.indexOf(key);
-          if (pos === -1) {
-            continue;
-          }
-          animation.keysToInterpolate.splice(pos, 1);
-        }
-      }
-      this.setOptions(options);
-      if (this.options.debugName && Dynamics.InteractivePanel) {
-        Dynamics.InteractivePanel.addAnimation(this);
-      }
-      Animations.push(this);
+      ];
+      EaseOut.__super__.constructor.call(this, options);
     }
 
-    Animation.prototype.setOptions = function(options) {
-      var _base, _base1, _base2, _base3;
-      if (options == null) {
-        options = {};
-      }
-      this.options = options;
-      if ((_base = this.options).duration == null) {
-        _base.duration = 1000;
-      }
-      if ((_base1 = this.options).complete == null) {
-        _base1.complete = null;
-      }
-      if ((_base2 = this.options).type == null) {
-        _base2.type = dynamics.Linear;
-      }
-      if ((_base3 = this.options).animated == null) {
-        _base3.animated = true;
-      }
-      if ((this.options.debugName != null) && (Dynamics.Overrides != null) && Dynamics.Overrides["for"](this.options.debugName)) {
-        this.options = Dynamics.Overrides.getOverride(this.options, this.options.debugName);
-      }
-      this.tween = new Tween(this.options);
-      this.tween.animation = this;
-      this.dynamic().init();
-      return this.returnsToSelf = false || this.dynamic().returnsToSelf;
-    };
+    return EaseOut;
 
-    Animation.prototype.dynamic = function() {
-      return this.tween.dynamic;
-    };
+  })(CustomBezier);
 
-    Animation.prototype.start = function(options) {
-      if (options == null) {
-        options = {};
-      }
-      if (options.delay == null) {
-        options.delay = this.options.delay;
-      }
-      if (options.delay == null) {
-        options.delay = 0;
-      }
-      stopAnimationsForEl(this.el, this.to, this);
-      if (options.delay <= 0) {
-        return this.tween.start();
-      } else {
-        return setTimeout(this.tween.start.bind(this.tween), options.delay);
-      }
-    };
+  curves.Spring = Spring;
 
-    Animation.prototype.stop = function() {
-      var _ref;
-      if ((_ref = this.tween) != null) {
-        _ref.stop();
-      }
-      this.animating = false;
-      return this.stopped = true;
-    };
+  curves.SelfSpring = SelfSpring;
 
-    return Animation;
+  curves.Gravity = Gravity;
 
-  })();
+  curves.GravityWithForce = GravityWithForce;
 
-  module.exports = Animation;
+  curves.Linear = Linear;
+
+  curves.Bezier = Bezier;
+
+  curves.EaseInOut = EaseInOut;
+
+  curves.EaseIn = EaseIn;
+
+  curves.EaseOut = EaseOut;
+
+  module.exports = curves;
 
 }).call(this);
 ;}});
@@ -977,11 +812,11 @@ this.require.define({"helpers":function(exports, require, module){(function() {
 
   helpers = {};
 
-  helpers.pxProperties = new Set(['marginTop', 'marginLeft', 'marginBottom', 'marginRight', 'paddingTop', 'paddingLeft', 'paddingBottom', 'paddingRight', 'top', 'left', 'bottom', 'right', 'translateX', 'translateY', 'translateZ']);
+  helpers.pxProperties = new Set(['marginTop', 'marginLeft', 'marginBottom', 'marginRight', 'paddingTop', 'paddingLeft', 'paddingBottom', 'paddingRight', 'top', 'left', 'bottom', 'right', 'translateX', 'translateY', 'translateZ', 'perspectiveX', 'perspectiveY', 'perspectiveZ', 'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight', 'borderRadius']);
 
   helpers.degProperties = new Set(['rotate', 'rotateX', 'rotateY', 'rotateZ', 'skew', 'skewX', 'skewY', 'skewZ']);
 
-  helpers.transformProperties = new Set(['translateX', 'translateY', 'translateZ', 'scale', 'scaleX', 'scaleY', 'scaleZ', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'skew', 'skewX', 'skewY', 'skewZ', 'perspective', 'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight']);
+  helpers.transformProperties = new Set(['translateX', 'translateY', 'translateZ', 'scale', 'scaleX', 'scaleY', 'scaleZ', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'skew', 'skewX', 'skewY', 'skewZ', 'perspective']);
 
   helpers.unitForProperty = function(k, v) {
     if (typeof v !== 'number') {
@@ -995,8 +830,82 @@ this.require.define({"helpers":function(exports, require, module){(function() {
     return '';
   };
 
+  helpers.isDefaultValueForProperty = function(k, v) {
+    if (k === 'scale') {
+      return v === 1;
+    } else {
+      return v === 0;
+    }
+    return false;
+  };
+
+  helpers.transformValueForProperty = function(k, v) {
+    var unit;
+    if (Math.abs(v) < 0.0000001) {
+      v = 0;
+    }
+    unit = helpers.unitForProperty(k, v);
+    return "" + k + "(" + v + unit + ")";
+  };
+
+  helpers.axisForTransformProperty = function(property) {
+    if (property === 'perspective' || property === 'skew') {
+      return ['X', 'Y'];
+    } else {
+      return ['X', 'Y', 'Z'];
+    }
+  };
+
+  helpers.parseProperties = function(properties) {
+    var axis, match, newProperties, property, value, _i, _len, _ref;
+    newProperties = {};
+    for (property in properties) {
+      value = properties[property];
+      if (helpers.transformProperties.contains(property)) {
+        match = property.match(/(translate|rotate|skew|scale|perspective)(X|Y|Z|)/);
+        if (match && match[2].length > 0) {
+          newProperties[property] = value;
+        } else {
+          _ref = helpers.axisForTransformProperty(match[1]);
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            axis = _ref[_i];
+            newProperties[match[1] + axis] = value;
+          }
+        }
+      } else {
+        newProperties[property] = value;
+      }
+    }
+    return newProperties;
+  };
+
+  helpers.applyFrame = function(el, properties) {
+    var k, v, _results;
+    if ((el.style != null)) {
+      return helpers.css(el, properties);
+    } else {
+      _results = [];
+      for (k in properties) {
+        v = properties[k];
+        _results.push(el[k] = v);
+      }
+      return _results;
+    }
+  };
+
   helpers.css = function(el, properties) {
-    var k, transforms, v;
+    var k, transforms, v, _base;
+    properties = helpers.parseProperties(properties);
+    if (el.dynamics == null) {
+      el.dynamics = {};
+    }
+    if ((_base = el.dynamics).style == null) {
+      _base.style = {};
+    }
+    for (k in properties) {
+      v = properties[k];
+      el.dynamics.style[k] = v;
+    }
     transforms = [];
     for (k in properties) {
       v = properties[k];
@@ -1004,7 +913,7 @@ this.require.define({"helpers":function(exports, require, module){(function() {
         transforms.push(v);
       }
       if (helpers.transformProperties.contains(k)) {
-        transforms.push("" + k + "(" + v + (helpers.unitForProperty(k, v)) + ")");
+        transforms.push(helpers.transformValueForProperty(k, v));
       } else {
         el.style[helpers.support.propertyWithPrefix(k)] = "" + v + (helpers.unitForProperty(k, v));
       }
@@ -1033,10 +942,21 @@ this.require.define({"helpers":function(exports, require, module){(function() {
     return cachedMethod;
   };
 
+  helpers.string = {};
+
+  helpers.string.toDashed = function(str) {
+    return str.replace(/([A-Z])/g, function($1) {
+      return "-" + $1.toLowerCase();
+    });
+  };
+
   helpers.support = {};
 
   helpers.support.prefixFor = helpers.cacheFn(function(property) {
     var k, prefix, prop, propArray, propertyName, _i, _j, _len, _len1, _ref;
+    if (document.body.style[property] !== void 0) {
+      return '';
+    }
     propArray = property.split('-');
     propertyName = "";
     for (_i = 0, _len = propArray.length; _i < _len; _i++) {
@@ -1061,9 +981,20 @@ this.require.define({"helpers":function(exports, require, module){(function() {
       return "" + prefix + (property.substring(0, 1).toUpperCase() + property.substring(1));
     }
     if (prefix !== '') {
-      return "-" + (prefix.toLowerCase()) + "-" + property;
+      return "-" + (prefix.toLowerCase()) + "-" + (helpers.string.toDashed(property));
     }
-    return property;
+    return helpers.string.toDashed(property);
+  });
+
+  helpers.support.animationEnd = helpers.cacheFn(function() {
+    var eventName, prefix;
+    prefix = helpers.support.prefixFor('animation');
+    if (prefix.length > 0) {
+      eventName = prefix.toLowerCase() + 'AnimationEnd';
+    } else {
+      eventName = 'animationend';
+    }
+    return eventName;
   });
 
   module.exports = helpers;
@@ -1072,180 +1003,132 @@ this.require.define({"helpers":function(exports, require, module){(function() {
 ;}});
 
 
-this.require.define({"loop":function(exports, require, module){(function() {
-  var Loop, Matrix, defaultForProperty, helpers, propertiesAtFrame;
+this.require.define({"animations":function(exports, require, module){(function() {
+  var Animation, Animations, helpers,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  Matrix = require('matrix');
+  Animation = require('animation');
 
   helpers = require('helpers');
 
-  defaultForProperty = function(property) {
-    if (property === 'opacity') {
-      return 1;
-    }
-    return 0;
-  };
-
-  propertiesAtFrame = function(t, args) {
-    var dValue, frame0, frame1, k, newValue, oldValue, progress, properties, transform, unit, v, value;
-    if (args == null) {
-      args = {};
-    }
-    frame0 = this.frames[0];
-    frame1 = this.frames[100];
-    progress = args.progress;
-    if (progress == null) {
-      progress = -1;
-    }
-    transform = '';
-    properties = {};
-    for (k in frame1) {
-      v = frame1[k];
-      value = v.value;
-      unit = v.unit;
-      newValue = null;
-      if (progress >= 1) {
-        if (this.returnsToSelf) {
-          newValue = frame0[k].value;
-        } else {
-          newValue = frame1[k].value;
+  Animations = (function() {
+    function Animations(arr, style) {
+      this.complete = __bind(this.complete, this);
+      this.change = __bind(this.change, this);
+      this.duration = __bind(this.duration, this);
+      this.timeLeft = __bind(this.timeLeft, this);
+      this.frame = __bind(this.frame, this);
+      var animation, animationArr, axis, frame, property, transformKeys, type, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+      this.style = style;
+      this.animations = [];
+      for (_i = 0, _len = arr.length; _i < _len; _i++) {
+        animationArr = arr[_i];
+        animation = new Animation(style, animationArr[0], animationArr[1]);
+        this.animations.push(animation);
+      }
+      frame = this.animations[0].frame(0);
+      transformKeys = [];
+      for (property in frame) {
+        value = frame[property];
+        if (helpers.transformProperties.contains(property)) {
+          transformKeys.push(property);
         }
       }
-      if (k === 'transform') {
-        if (this.keysToInterpolate.length === 0) {
-          continue;
-        }
-        if (newValue == null) {
-          newValue = Matrix.interpolate(frame0[k].value, frame1[k].value, t, this.keysToInterpolate);
-        }
-        properties['transform'] = Matrix.recompose(newValue);
-      } else if (this.keysToInterpolate.indexOf(k.toLowerCase()) !== -1) {
-        if (!newValue) {
-          oldValue = null;
-          if (frame0[k]) {
-            oldValue = frame0[k].value;
+      this.initialTransform = [];
+      _ref = ['translate', 'scale', 'skew', 'perspective', 'rotate'];
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        type = _ref[_j];
+        _ref1 = ['X', 'Y', 'Z'];
+        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+          axis = _ref1[_k];
+          if (axis === 'Z' && (type === 'skew' || type === 'perspective')) {
+            continue;
           }
-          if ((oldValue == null) || isNaN(oldValue)) {
-            oldValue = defaultForProperty(k);
-          }
-          dValue = value - oldValue;
-          newValue = oldValue + (dValue * t);
-        }
-        properties[k] = newValue;
-      }
-    }
-    return properties;
-  };
-
-  Loop = {
-    tweens: [],
-    tweensToRemoveAtNextTick: [],
-    running: false,
-    start: function() {
-      this.running = true;
-      return requestAnimationFrame(this.tick.bind(this));
-    },
-    stop: function() {
-      return this.running = false;
-    },
-    tick: function(ts) {
-      var animation, el, elProperties, found, k, properties, propertiesByEls, tween, tweens, v, _base, _base1, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
-      if (!this.running) {
-        return;
-      }
-      tweens = this.tweens.slice();
-      propertiesByEls = [];
-      for (_i = 0, _len = tweens.length; _i < _len; _i++) {
-        tween = tweens[_i];
-        tween.tick(ts);
-      }
-      for (_j = 0, _len1 = tweens.length; _j < _len1; _j++) {
-        tween = tweens[_j];
-        if (tween.animation == null) {
-          continue;
-        }
-        animation = tween.animation;
-        properties = propertiesAtFrame.call(animation, tween.value, {
-          progress: tween.t
-        });
-        found = false;
-        for (_k = 0, _len2 = propertiesByEls.length; _k < _len2; _k++) {
-          _ref = propertiesByEls[_k], el = _ref[0], elProperties = _ref[1];
-          if (animation.el === el) {
-            for (k in properties) {
-              v = properties[k];
-              if (k === 'transform' && elProperties[k]) {
-                v = v.multiply(elProperties[k]);
-              }
-              elProperties[k] = v;
+          property = type + axis;
+          if (transformKeys.indexOf(property) === -1) {
+            value = this.style[property];
+            if (helpers.isDefaultValueForProperty(property, value)) {
+              continue;
             }
-            found = true;
-            break;
+            this.initialTransform.push(helpers.transformValueForProperty(property, value));
           }
         }
-        if (!found) {
-          propertiesByEls.push([animation.el, properties]);
-        }
-      }
-      for (_l = 0, _len3 = propertiesByEls.length; _l < _len3; _l++) {
-        _ref1 = propertiesByEls[_l], el = _ref1[0], properties = _ref1[1];
-        if (properties['transform'] != null) {
-          properties['transform'] = properties['transform'].toString();
-        }
-        if (el.style) {
-          helpers.css(el, properties);
-        } else {
-          for (k in properties) {
-            v = properties[k];
-            el[k] = v;
-          }
-        }
-      }
-      for (_m = 0, _len4 = tweens.length; _m < _len4; _m++) {
-        tween = tweens[_m];
-        if (typeof (_base = tween.options).change === "function") {
-          _base.change(tween.t, tween.value);
-        }
-        if (tween.t === 1) {
-          if (typeof (_base1 = tween.options).complete === "function") {
-            _base1.complete();
-          }
-        }
-      }
-      this.removeUselessTweens();
-      return requestAnimationFrame(this.tick.bind(this));
-    },
-    add: function(tween) {
-      if (this.tweens.indexOf(tween) === -1) {
-        this.tweens.push(tween);
-      }
-      if (!this.running && this.tweens.length > 0) {
-        return this.start();
-      }
-    },
-    remove: function(tween) {
-      if (this.tweens.indexOf(tween) === -1) {
-        return;
-      }
-      return this.tweensToRemoveAtNextTick.push(tween);
-    },
-    removeUselessTweens: function() {
-      var tween, _i, _len, _ref;
-      _ref = this.tweensToRemoveAtNextTick;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        tween = _ref[_i];
-        if (this.tweens.indexOf(tween) !== -1) {
-          this.tweens.splice(this.tweens.indexOf(tween), 1);
-        }
-      }
-      this.tweensToRemoveAtNextTick = [];
-      if (this.running && this.tweens.length === 0) {
-        return this.stop();
       }
     }
-  };
 
-  module.exports = Loop;
+    Animations.prototype.frame = function(ts) {
+      var frame, newFrame, property, transform, unit, value;
+      frame = this.animations[0].frame(ts);
+      return frame;
+      newFrame = {};
+      transform = this.initialTransform.slice();
+      for (property in frame) {
+        value = frame[property];
+        if (helpers.transformProperties.contains(property)) {
+          transform.push(helpers.transformValueForProperty(property, value));
+        } else {
+          if (Math.abs(value) < 0.0000001) {
+            value = 0;
+          }
+          unit = helpers.unitForProperty(property, value);
+          newFrame[helpers.support.propertyWithPrefix(property)] = value + unit;
+        }
+      }
+      if (transform.length > this.initialTransform.length) {
+        newFrame[helpers.support.propertyWithPrefix("transform")] = transform.join(' ');
+      }
+      return newFrame;
+    };
+
+    Animations.prototype.timeLeft = function() {
+      var animation, times, _i, _len, _ref;
+      times = [];
+      _ref = this.animations;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        animation = _ref[_i];
+        times.push(animation.timeLeft());
+      }
+      return Math.max.apply(Math, times);
+    };
+
+    Animations.prototype.duration = function() {
+      var animation, durations, _i, _len, _ref;
+      durations = [];
+      _ref = this.animations;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        animation = _ref[_i];
+        durations.push(animation.duration());
+      }
+      return Math.max.apply(Math, durations);
+    };
+
+    Animations.prototype.change = function() {
+      var animation, _i, _len, _ref, _results;
+      _ref = this.animations;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        animation = _ref[_i];
+        _results.push(animation.change());
+      }
+      return _results;
+    };
+
+    Animations.prototype.complete = function() {
+      var animation, _i, _len, _ref, _results;
+      _ref = this.animations;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        animation = _ref[_i];
+        _results.push(animation.complete());
+      }
+      return _results;
+    };
+
+    return Animations;
+
+  })();
+
+  module.exports = Animations;
 
 }).call(this);
 ;}});
@@ -1466,24 +1349,30 @@ this.require.define({"matrix":function(exports, require, module){(function() {
     };
 
     Matrix.prototype.decompose = function() {
-      var els, i, inversePerspectiveMatrix, j, k, matrix, pdum3, perspective, perspectiveMatrix, quaternion, result, rightHandSide, rotate, row, rowElement, s, scale, skew, t, translate, transposedInversePerspectiveMatrix, type, typeKey, v, w, x, y, z, _i, _j, _k, _l, _m, _n, _o, _p;
+      var els, i, inversePerspectiveMatrix, j, k, matrix, pdum3, perspective, perspectiveMatrix, quaternion, result, rightHandSide, rotate, row, rowElement, s, scale, skew, t, translate, transposedInversePerspectiveMatrix, type, typeKey, v, w, x, y, z, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
       matrix = this;
       translate = [];
       scale = [];
       skew = [];
       quaternion = [];
       perspective = [];
-      els = matrix.els;
+      els = [];
+      for (i = _i = 0; _i <= 3; i = ++_i) {
+        els[i] = [];
+        for (j = _j = 0; _j <= 3; j = ++_j) {
+          els[i][j] = matrix.els[i][j];
+        }
+      }
       if (els[3][3] === 0) {
         return false;
       }
-      for (i = _i = 0; _i <= 3; i = ++_i) {
-        for (j = _j = 0; _j <= 3; j = ++_j) {
+      for (i = _k = 0; _k <= 3; i = ++_k) {
+        for (j = _l = 0; _l <= 3; j = ++_l) {
           els[i][j] /= els[3][3];
         }
       }
       perspectiveMatrix = matrix.dup();
-      for (i = _k = 0; _k <= 2; i = ++_k) {
+      for (i = _m = 0; _m <= 2; i = ++_m) {
         perspectiveMatrix.els[i][3] = 0;
       }
       perspectiveMatrix.els[3][3] = 1;
@@ -1492,19 +1381,19 @@ this.require.define({"matrix":function(exports, require, module){(function() {
         inversePerspectiveMatrix = perspectiveMatrix.inverse();
         transposedInversePerspectiveMatrix = inversePerspectiveMatrix.transpose();
         perspective = transposedInversePerspectiveMatrix.multiply(rightHandSide).els;
-        for (i = _l = 0; _l <= 2; i = ++_l) {
+        for (i = _n = 0; _n <= 2; i = ++_n) {
           els[i][3] = 0;
         }
         els[3][3] = 1;
       } else {
         perspective = [0, 0, 0, 1];
       }
-      for (i = _m = 0; _m <= 2; i = ++_m) {
+      for (i = _o = 0; _o <= 2; i = ++_o) {
         translate[i] = els[3][i];
         els[3][i] = 0;
       }
       row = [];
-      for (i = _n = 0; _n <= 2; i = ++_n) {
+      for (i = _p = 0; _p <= 2; i = ++_p) {
         row[i] = new Vector(els[i].slice(0, 3));
       }
       scale[0] = row[0].length();
@@ -1524,9 +1413,9 @@ this.require.define({"matrix":function(exports, require, module){(function() {
       skew[2] /= scale[2];
       pdum3 = row[1].cross(row[2]);
       if (row[0].dot(pdum3) < 0) {
-        for (i = _o = 0; _o <= 2; i = ++_o) {
+        for (i = _q = 0; _q <= 2; i = ++_q) {
           scale[i] *= -1;
-          for (j = _p = 0; _p <= 2; j = ++_p) {
+          for (j = _r = 0; _r <= 2; j = ++_r) {
             row[i].els[j] *= -1;
           }
         }
@@ -1593,7 +1482,7 @@ this.require.define({"matrix":function(exports, require, module){(function() {
     Matrix.interpolate = function(decomposedA, decomposedB, t, only) {
       var angle, decomposed, i, invscale, invth, k, qa, qb, scale, th, _i, _j, _k, _l, _len, _ref, _ref1;
       if (only == null) {
-        only = [];
+        only = null;
       }
       decomposed = {};
       _ref = ['translate', 'scale', 'skew', 'perspective'];
@@ -1601,14 +1490,14 @@ this.require.define({"matrix":function(exports, require, module){(function() {
         k = _ref[_i];
         decomposed[k] = [];
         for (i = _j = 0, _ref1 = decomposedA[k].length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          if (only.indexOf(k) > -1 || only.indexOf("" + k + ['x', 'y', 'z'][i]) > -1) {
+          if ((only == null) || only.indexOf(k) > -1 || only.indexOf("" + k + ['x', 'y', 'z'][i]) > -1) {
             decomposed[k][i] = (decomposedB[k][i] - decomposedA[k][i]) * t + decomposedA[k][i];
           } else {
             decomposed[k][i] = decomposedA[k][i];
           }
         }
       }
-      if (only.indexOf('rotate') !== -1) {
+      if ((only == null) || only.indexOf('rotate') !== -1) {
         qa = decomposedA.quaternion;
         qb = decomposedB.quaternion;
         angle = qa[0] * qb[0] + qa[1] * qb[1] + qa[2] * qb[2] + qa[3] * qb[3];
@@ -1694,6 +1583,8 @@ this.require.define({"matrix":function(exports, require, module){(function() {
     Matrix.transformStringToMatrixString = helpers.cacheFn(function(transform) {
       var matrixEl, result, style;
       matrixEl = document.createElement('div');
+      matrixEl.style.position = 'absolute';
+      matrixEl.style.visibility = 'hidden';
       matrixEl.style[helpers.support.propertyWithPrefix("transform")] = transform;
       document.body.appendChild(matrixEl);
       style = window.getComputedStyle(matrixEl, null);
@@ -1755,69 +1646,6 @@ this.require.define({"set":function(exports, require, module){(function() {
   })();
 
   module.exports = Set;
-
-}).call(this);
-;}});
-
-
-this.require.define({"tween":function(exports, require, module){(function() {
-  var Loop, Tween,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  Loop = require('loop');
-
-  Tween = (function() {
-    function Tween(options) {
-      this.options = options;
-      this.tick = __bind(this.tick, this);
-      this.stop = __bind(this.stop, this);
-      this.start = __bind(this.start, this);
-      this.dynamic = new this.options.type(this.options);
-      this.value = 0;
-    }
-
-    Tween.prototype.start = function() {
-      this.animating = true;
-      this.stopped = false;
-      this.ts = null;
-      return Loop.add(this);
-    };
-
-    Tween.prototype.stop = function() {
-      this.animating = false;
-      this.stopped = true;
-      return Loop.remove(this);
-    };
-
-    Tween.prototype.tick = function(ts) {
-      var dTs;
-      if (this.stopped) {
-        Loop.remove(this);
-        return;
-      }
-      this.t = 0;
-      if (this.ts) {
-        dTs = ts - this.ts;
-        this.t = dTs / this.options.duration;
-      } else {
-        this.ts = ts;
-      }
-      if (this.t > 1) {
-        this.t = 1;
-      }
-      this.value = this.dynamic.at(this.t)[1];
-      if (this.t === 1) {
-        Loop.remove(this);
-        this.stopped = true;
-        return this.animating = false;
-      }
-    };
-
-    return Tween;
-
-  })();
-
-  module.exports = Tween;
 
 }).call(this);
 ;}});
@@ -1914,41 +1742,120 @@ this.require.define({"vector":function(exports, require, module){(function() {
 
 
 (function() {
-  var Element, ElementStore, dynamic, dynamics, k, v;
+  var Animations, Matrix, ct, curve, curves, dynamics, getStyle, helpers, runningAnimations, startAnimations, tick, type;
 
-  Element = require('element');
+  curves = require('curves');
 
-  dynamics = require('dynamics');
+  helpers = require('helpers');
 
-  ElementStore = {
-    dynamicElements: [],
-    dynamicElementFor: function(el) {
-      var dynamicElement, _i, _len, _ref;
-      _ref = this.dynamicElements;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        dynamicElement = _ref[_i];
-        if (dynamicElement.el() === el) {
-          return dynamicElement;
+  Animations = require('animations');
+
+  Matrix = require('matrix');
+
+  ct = 0;
+
+  runningAnimations = [];
+
+  tick = function(t) {
+    var frame, running, toRemove, ts, _i, _j, _len, _len1;
+    ts = t - ct;
+    ct = t;
+    toRemove = [];
+    for (_i = 0, _len = runningAnimations.length; _i < _len; _i++) {
+      running = runningAnimations[_i];
+      frame = running.animations.frame(ts);
+      helpers.applyFrame(running.element, frame);
+      if (running.animations.timeLeft() <= 0) {
+        toRemove.push(running);
+      }
+      running.animations.change();
+    }
+    for (_j = 0, _len1 = toRemove.length; _j < _len1; _j++) {
+      running = toRemove[_j];
+      runningAnimations.splice(runningAnimations.indexOf(running), 1);
+      running.animations.complete();
+    }
+    return requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
+
+  startAnimations = function(element, animations, options) {
+    if (options == null) {
+      options = {};
+    }
+    dynamics.stop(element);
+    return runningAnimations.push({
+      element: element,
+      animations: animations,
+      options: options
+    });
+  };
+
+  getStyle = function(element, properties) {
+    var property, style, _base, _i, _len;
+    if (element.style != null) {
+      if (element.dynamics == null) {
+        element.dynamics = {};
+      }
+      if ((_base = element.dynamics).style == null) {
+        _base.style = {};
+      }
+      style = element.dynamics.style;
+      for (_i = 0, _len = properties.length; _i < _len; _i++) {
+        property = properties[_i];
+        if (style[property] == null) {
+          style[property] = 0;
         }
       }
-      dynamicElement = new Element(el);
-      this.dynamicElements.push(dynamicElement);
-      return dynamicElement;
+      return style;
+    } else {
+      return element;
     }
   };
 
-  dynamic = function(el) {
-    return ElementStore.dynamicElementFor(el);
+  dynamics = function(element, properties, options) {
+    var allProperties, animation, animations, animationsArr, style, _i, _len;
+    if (properties instanceof Array) {
+      animationsArr = properties;
+    } else {
+      animationsArr = [[properties, options]];
+    }
+    allProperties = [];
+    for (_i = 0, _len = animationsArr.length; _i < _len; _i++) {
+      animation = animationsArr[_i];
+      allProperties = allProperties.concat(Object.keys(animation[0]));
+    }
+    style = getStyle(element, allProperties);
+    animations = new Animations(animationsArr, style);
+    return startAnimations(element, animations, options);
   };
 
-  for (k in dynamics) {
-    v = dynamics[k];
-    dynamic[k] = v;
+  for (type in curves) {
+    curve = curves[type];
+    dynamics[type] = curve;
   }
 
-  this.dynamic = dynamic;
+  dynamics.stop = function(element) {
+    var running, _i, _len, _ref, _results;
+    _ref = runningAnimations.slice();
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      running = _ref[_i];
+      if (running.element === element) {
+        _results.push(runningAnimations.splice(runningAnimations.indexOf(running), 1));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  dynamics.css = helpers.css;
+
+  this.dynamics = dynamics;
 
 }).call(this);
 
-  return this.dynamic;
+  return this.dynamics;
 }.apply({});

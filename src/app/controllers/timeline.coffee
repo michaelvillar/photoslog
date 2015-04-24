@@ -48,6 +48,7 @@ class Timeline extends Controller
 
   # Private
   groupFromPath: (path) =>
+    return unless @groups
     for group in @groups
       return group if group.path == path
 
@@ -76,7 +77,7 @@ class Timeline extends Controller
     return if scroll.scrolling
     router.goToGroup(group, { trigger: false })
 
-  onPhotoClick: (photosGroupView, image) =>
-    console.log image
+  onPhotoClick: (photosGroupView, view, image) =>
+    @trigger('photoClick', @, view, image)
 
 module.exports = Timeline

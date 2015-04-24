@@ -1,17 +1,16 @@
 EventDispatcher = require('eventDispatcher')
-require('dynamics.js')
 
-dynamicViews = null
-dynamicObj = null
+views = []
+animating = false
 obj = null
 
 restore = (y) ->
-  for view in dynamicViews
+  for view in views
     view.css(translateY: 0, translateZ: 0)
   window.scrollTo(0, y)
   document.body.style.height = "auto"
   scroll.scrolling = false
-  dynamicObj = null
+  objAnimation = null
 
 scroll = new EventDispatcher
 
@@ -22,9 +21,10 @@ scroll.value =
 scroll.scrolling = false
 
 window.addEventListener('scroll', ->
-  if dynamicObj?
-    dynamicObj.stop()
+  if animating
+    dynamics.stop(obj)
     restore(obj.y)
+    animating = false
   scroll.value =
     x: window.scrollX
     y: window.scrollY
@@ -32,12 +32,11 @@ window.addEventListener('scroll', ->
 )
 
 scroll.to = (options = {}) ->
-  if dynamicObj?
-    dynamicObj.stop()
-    dynamicObj = null
+  if animating
+    dynamics.stop(obj)
+    animating = false
 
   scroll.scrolling = true
-  scroll.animated
   body = document.body
   html = document.documentElement
 
@@ -48,14 +47,15 @@ scroll.to = (options = {}) ->
   # Max scroll value
   options.y = Math.min(options.y, bodyHeight - window.innerHeight)
 
-  obj = { y: scroll.value.y }
   initial = window.scrollY
-  dynamicViews = options.views.map (view) -> dynamic(view.el)
-  dynamicObj = dynamic(obj)
-  dynamicObj.to({
+  views = options.views
+
+  obj = { y: scroll.value.y }
+  animating = true
+  dynamics(obj, {
     y: options.y
   }, {
-    type: dynamic.Spring,
+    type: dynamics.Spring,
     frequency: 9,
     friction: 350,
     anticipationStrength: 82,
@@ -63,8 +63,8 @@ scroll.to = (options = {}) ->
     duration: 1000,
     change: ->
       return unless scroll.scrolling
-      for view in dynamicViews
-        view.css(translateY: - obj.y + initial, translateZ: 0)
+      for view in views
+        view.css({ translateY: - obj.y + initial, translateZ: 0 })
       scroll.value =
         x: scroll.value.x
         y: obj.y
@@ -72,6 +72,6 @@ scroll.to = (options = {}) ->
     complete: ->
       return unless scroll.scrolling
       restore(obj.y)
-  }).start()
+  })
 
 module.exports = scroll

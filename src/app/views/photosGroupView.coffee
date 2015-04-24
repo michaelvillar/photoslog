@@ -1,9 +1,6 @@
 View = require('view')
 ImageView = require('imageView')
-
-pixelRatio = window.devicePixelRatio ? 1
-pixelRatio = {1:1, 2:2}[pixelRatio] ? 1
-ratio = "#{pixelRatio}x"
+ratio = require('ratio')
 
 class PhotosGroupView extends View
   className: 'photosGroupView'
@@ -54,7 +51,7 @@ class PhotosGroupView extends View
     @fullImage.view.el.style.height = "#{@fullImage.size.height / @fullImage.size.width * @fullImage.view.width()}px"
 
   createImageView: (image) =>
-    filePath = ["/data", @options.group.path, image.files[ratio]].join('/')
+    filePath = image.files[ratio]
     imageView = new ImageView(
       className: image.type,
       queue: @options.queue,
@@ -73,6 +70,6 @@ class PhotosGroupView extends View
     @cachedFrame
 
   onClick: (imageView) =>
-    @trigger('click', @, imageView.options.object)
+    @trigger('click', @, imageView, imageView.options.object)
 
 module.exports = PhotosGroupView
