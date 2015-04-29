@@ -147,8 +147,7 @@ class TimelineView extends View
 
   center: =>
     height = @height()
-    containerHeight = @containerView.height()
-    @marginTop = (height - containerHeight) * 0.4
+    @marginTop = height * 0.4
     @marginTop = Math.max(16, @marginTop)
     @containerView.el.style.marginTop = "#{@marginTop}px"
     @verticalLineView.el.style.marginTop = "#{@marginTop}px"
