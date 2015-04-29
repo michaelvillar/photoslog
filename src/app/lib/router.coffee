@@ -18,7 +18,7 @@ router.goToGroup = (group, options = {}) ->
 router.goTo = (state, url, options = {}) ->
   options.trigger ?= true
   return if JSON.stringify(router.state) == JSON.stringify(state)
-  history.pushState(state, "", url)
+  # history.pushState(state, "", url)
   router.state = state
   router.trigger('change', state) if options.trigger
 
