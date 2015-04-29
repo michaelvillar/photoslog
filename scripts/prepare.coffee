@@ -1,6 +1,7 @@
 #!/usr/bin/env ./node_modules/coffee-script/bin/coffee
 
 easyimage = require 'easyimage'
+syncfs = require 'fs'
 fs = require 'q-io/fs'
 Q = require 'q'
 _ = require 'lodash'
@@ -8,6 +9,33 @@ _ = require 'lodash'
 BASE = './'
 SRC =  "#{BASE}data/"
 DST = "#{BASE}public/data/"
+
+queueArray = []
+executingQueue = false
+job = 0
+totalJobs = 0
+queue = (fn) ->
+  totalJobs += 1
+  deferred = Q.defer()
+  queueArray.push(
+    ->
+      fn().then ->
+        deferred.resolve.apply(deferred, Array.prototype.slice.call(arguments))
+        nextInQueue()
+  )
+  nextInQueue() if !executingQueue
+  deferred.promise
+
+nextInQueue = ->
+  if queueArray.length == 0
+    executingQueue = false
+    return
+
+  job += 1
+  console.log 'Start #' + job + ' / ' + totalJobs
+  executingQueue = true
+  fn = queueArray.splice(0, 1)
+  fn[0]()
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
@@ -18,6 +46,7 @@ start = ->
     Q.all do ->
       for dir in dirs
         continue if dir == '.DS_Store'
+        continue unless existsInfoJson(dir)
         parseGroup(dir)
   ).then((groups) ->
     console.log('Creating timeline...')
@@ -28,24 +57,22 @@ start = ->
     console.log(e)
   )
 
+existsInfoJson = (dir) ->
+  groupDir = SRC + dir + "/"
+  syncfs.existsSync(groupDir + "info.json")
+
 parseGroup = (dir) ->
   groupDir = SRC + dir + "/"
   dstGroupDir = DST + dir + "/"
-  fs.exists(groupDir + "info.json")
+  fs.exists(dstGroupDir)
   .then((exists) ->
-    return false unless exists
-    fs.exists(dstGroupDir)
-  ).then((exists) ->
-    return true if exists
+    return if exists
     fs.makeDirectory(dstGroupDir)
   ).then(->
     console.log "Parsing #{groupDir + "info.json"}"
     parseInfoFile(groupDir, "info.json")
   ).then((json) ->
-    ps = for image in json.images
-      console.log "Copying #{dstGroupDir + image.file}"
-      fs.copy(groupDir + image.file, dstGroupDir + image.file)
-
+    ps = []
     console.log "Writing #{dstGroupDir + "info.json"}"
     ps.push(fs.write(dstGroupDir + "info.json", JSON.stringify(json)))
 
@@ -59,24 +86,15 @@ parseInfoFile = (groupDir, fileName, dstDir) ->
   returnJson = null
   fs.read(infoFilePath).then((data) ->
     JSON.parse(data)
-  ).then((json) ->
-    returnJson = json
-    Q.all do ->
-      for image in json.images
-        do (image) =>
-          easyimage.info(groupDir + image.file).then((info) =>
-            image.size =
-              width: info.width
-              height: info.height
-          )
-  ).then(->
-    returnJson
   )
 
 createTimeline = (groups) ->
   json = {}
   json.groups = groups.sort (a, b) ->
-    new Date(a.date) > new Date(b.date)
+    if (new Date(a.date)).getTime() > (new Date(b.date)).getTime()
+      return 1
+    else
+      return -1
 
   Q.all(
     _.flatten do ->
@@ -109,7 +127,8 @@ processTimelineImage = (group, image) ->
     suffix: '_timeline'
   }).then((filenames) ->
     files = _.merge.apply(this, filenames)
-    easyimage.info(dstPath + files['1x'])
+    queue =>
+      easyimage.info(dstPath + files['1x'])
   ).then((info) ->
     files: files, info: info
   )
@@ -134,7 +153,6 @@ resizeImage = (file, dstPath, opts = {}, others = {}) =>
 
         options.src = file
         options.dst = dstPath + suffixedFilename
-        console.log "Resizing #{options.src} to #{options.dst}"
         options.quality = 95
         for key in ['width', 'height', 'cropwidth', 'cropheight', 'x', 'y']
           options[key] *= ratio if options[key]?
@@ -142,7 +160,10 @@ resizeImage = (file, dstPath, opts = {}, others = {}) =>
         fs.exists(options.dst)
         .then((exists) ->
           return if exists
-          easyimage.resize(options)
+          queue =>
+            console.log "Resizing #{options.src} to #{options.dst}"
+            return Q() if syncfs.existsSync(options.dst)
+            easyimage.resize(options)
         ).then(->
           r = {}
           r["#{ratio}x"] = suffixedFilename

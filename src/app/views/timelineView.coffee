@@ -1,4 +1,5 @@
 View = require('view')
+scroll = require('scroll')
 
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 pixelRatio = window.devicePixelRatio ? 1
@@ -9,12 +10,27 @@ multiply = (obj, value) ->
     newObj[k] = v * value
   newObj
 
+getWindowSize = do ->
+  size = {}
+  gen = ->
+    size =
+      width: window.innerWidth
+      height: window.innerHeight
+  gen()
+  window.addEventListener('resize', gen)
+  -> size
+
+roundf = (v, decimal) ->
+  d = Math.pow(10, decimal)
+  return Math.round(v * d) / d
+
 class TimelineView extends View
   className: 'timelineView'
 
   constructor: ->
     super
 
+    @translateY = 0
     @canvas = new View(tag: 'canvas', className: 'curvedLinesCanvas')
     @ctx = @canvas.el.getContext("2d")
     @addSubview(@canvas)
@@ -33,6 +49,7 @@ class TimelineView extends View
       @center()
       @redraw()
     )
+    scroll.on('change', @onScroll)
 
   setVisibleGroups: (groups) =>
     groups.sort (a, b) ->
@@ -75,6 +92,7 @@ class TimelineView extends View
 
   setGroups: (groups) =>
     currentYear = null
+    verticalLineViewHeight = 0
 
     addYearView = (year) =>
       yearView = new View(tag: 'p', className: 'yearView')
@@ -83,6 +101,11 @@ class TimelineView extends View
 
     for group in groups
       do (group) =>
+        date = new Date(group.date)
+        if currentYear? and currentYear != date.getFullYear()
+          verticalLineViewHeight += 36
+          addYearView(currentYear)
+
         itemView = new View(tag: 'a', group: group)
         itemView.el.addEventListener('click', =>
           @trigger('click', group)
@@ -94,7 +117,6 @@ class TimelineView extends View
 
         dateView = new View(tag: 'span', className: 'dateView')
 
-        date = new Date(group.date)
         monthString = months[date.getMonth()].toUpperCase()
 
         dateView.text("#{monthString} #{date.getFullYear()}")
@@ -103,17 +125,19 @@ class TimelineView extends View
         circleView = new View(tag: 'span', className: 'circleView')
         itemView.addSubview(circleView)
 
-        @containerView.addSubview(itemView)
+        verticalLineViewHeight += 36
 
-        if currentYear? and currentYear != date.getFullYear()
-          addYearView(currentYear)
+        @containerView.addSubview(itemView)
 
         currentYear = date.getFullYear()
 
     addYearView(currentYear) if currentYear?
 
+    @verticalLineView.el.style.height = (verticalLineViewHeight - 36) + "px"
+
   itemForGroup: (group) =>
     for view in @containerView.subviews
+      continue if !view.options.group?
       return view if view.options.group.path == group.path
     null
 
@@ -124,10 +148,10 @@ class TimelineView extends View
   center: =>
     height = @height()
     containerHeight = @containerView.height()
-    marginTop = (height - containerHeight) * 0.4
-    marginTop = Math.max(16, marginTop)
-    @containerView.el.style.marginTop = "#{marginTop}px"
-    @verticalLineView.el.style.marginTop = "#{marginTop}px"
+    @marginTop = (height - containerHeight) * 0.4
+    @marginTop = Math.max(16, @marginTop)
+    @containerView.el.style.marginTop = "#{@marginTop}px"
+    @verticalLineView.el.style.marginTop = "#{@marginTop}px"
 
   redraw: =>
     requestAnimationFrame =>
@@ -156,6 +180,7 @@ class TimelineView extends View
       continue unless item?
 
       itemRect = item.frame()
+      itemRect.y += @translateY
       groupRect = group.rect
 
       if group.group == @selectedGroup
@@ -197,5 +222,16 @@ class TimelineView extends View
     @updateCanvasSize()
     @center()
     @redraw()
+
+  onScroll: =>
+    scrollY = scroll.value.y
+    height = document.body.clientHeight - getWindowSize().height
+    percent = scrollY / height
+
+    @translateY = roundf(-percent * (@containerView.height() - @marginTop), 2)
+    transform = "translate3d(0,"+@translateY+"px,0)"
+
+    @containerView.el.style.webkitTransform = transform
+    @verticalLineView.el.style.webkitTransform = transform
 
 module.exports = TimelineView

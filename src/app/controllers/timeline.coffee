@@ -74,8 +74,8 @@ class Timeline extends Controller
     router.goToGroup(group)
 
   onSelectedGroupDidChange: (group) =>
-    return if scroll.scrolling
-    router.goToGroup(group, { trigger: false })
+    # return if scroll.scrolling
+    # router.goToGroup(group, { trigger: false })
 
   onPhotoClick: (photosGroupView, view, image) =>
     @trigger('photoClick', @, view, image)

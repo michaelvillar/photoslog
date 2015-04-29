@@ -35,6 +35,7 @@ parse = ->
 
 init = ->
   window.addEventListener 'popstate', (e) =>
+    return unless e.state
     router.state = e.state
     router.trigger('change', e.state)
 
