@@ -8,5 +8,6 @@ app.get('*', function(req, res) {
     }
   });
 })
-app.listen(8000);
-console.info("Listening on port 8000")
+var port = process.env.PORT || 8000;
+app.listen(port);
+console.info("Listening on port " + port);
