@@ -5,6 +5,7 @@ TimelineView = require('timelineView')
 get = require('get')
 router = require('router')
 scroll = require('scroll')
+config = require('config')
 
 class Timeline extends Controller
   constructor: ->
@@ -25,7 +26,7 @@ class Timeline extends Controller
     @bindEvents()
 
   load: =>
-    get '/data/info.json', @onLoad
+    get config.imagesRootPath + 'info.json', @onLoad
 
   bindEvents: =>
     @timelineView.on('click', @onClick)
