@@ -2,6 +2,7 @@ View = require('view')
 ImageView = require('imageView')
 ratio = require('ratio')
 months = require('months')
+config = require('config')
 
 class PhotosGroupView extends View
   className: 'photosGroupView'
@@ -66,7 +67,7 @@ class PhotosGroupView extends View
     imageView = new ImageView(
       className: image.type,
       queue: @options.queue,
-      imagePath: filePath,
+      imagePath: config.imagesRootPath + filePath,
       object: image
     )
     imageView

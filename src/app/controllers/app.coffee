@@ -3,10 +3,13 @@ View = require('view')
 Timeline = require('timeline')
 Fullscreen = require('fullscreen')
 router = require('router')
+config = require('config')
 
 class App extends Controller
   constructor: ->
     super
+
+    config.imagesRootPath = @options.imagesRootPath
 
     @view = new View({ el: document.body, className: 'appView' })
 

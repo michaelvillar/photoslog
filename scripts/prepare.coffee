@@ -107,7 +107,7 @@ createTimeline = (groups) ->
           do (group, image) ->
             processTimelineImage(group, image).then((args) ->
               delete image.file
-              image.files = _.mapValues(args.files, (file) -> "/data/#{group.path}#{file}" )
+              image.files = _.mapValues(args.files, (file) -> "#{group.path}#{file}" )
               image.size =
                 width: args.info.width
                 height: args.info.height
