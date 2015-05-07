@@ -1,7 +1,7 @@
 View = require('view')
 scroll = require('scroll')
+months = require('months')
 
-months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 pixelRatio = window.devicePixelRatio ? 1
 
 multiply = (obj, value) ->

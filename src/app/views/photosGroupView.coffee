@@ -1,11 +1,22 @@
 View = require('view')
 ImageView = require('imageView')
 ratio = require('ratio')
+months = require('months')
 
 class PhotosGroupView extends View
   className: 'photosGroupView'
 
   render: =>
+    @label = new View(tag: 'h2')
+    @label.text(@options.group.name)
+    @addSubview(@label)
+
+    @date = new View(tag: 'span')
+    date = new Date(@options.group.date)
+    monthString = months[date.getMonth()].toUpperCase()
+    @date.text("#{monthString} #{date.getFullYear()}")
+    @label.addSubview(@date)
+
     @appendFullImage(@options.group.images[0])
     @appendRowImages(@options.group.images[1..@options.group.images.length - 1])
 

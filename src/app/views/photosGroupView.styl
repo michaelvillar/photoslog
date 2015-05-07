@@ -4,6 +4,10 @@
   width: 100%
   line-height: 0
 
+  > h2 {
+    display: none
+  }
+
   > .imageView {
     display: inline-block
     transform: translateZ(0px)
@@ -17,6 +21,28 @@
       margin-bottom: 7px
       &:not(:last-child) {
         margin-right: 7px
+      }
+    }
+  }
+}
+
+@media all and (max-width: 750px) {
+  .photosGroupView {
+    > h2 {
+      display: block
+      font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
+      font-size: 18px
+      font-weight: normal
+      cursor: default
+      color: #565656
+      position: relative
+      top: -20px
+
+      > span {
+        float: right
+        font-family: "HelveticaNeueLight", "HelveticaNeue-Light", "Helvetica-Neue-Light", "Helvetica", Arial, sans-serif
+        font-size: 11px
+        color: #565656
       }
     }
   }
