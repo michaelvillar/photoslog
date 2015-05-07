@@ -1,6 +1,4 @@
 data/*
 public/data/*/*
 public/data/*
-public/css/*
-public/js/*
 node_modules
