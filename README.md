@@ -4,11 +4,11 @@
 # Usage
 
 ## Photos
-Create a `data` folder: this is where all your photos will live.
+Create a `data` folder: this is where your photos will live.
 
-For each group of photos, create a folder i.e. "sanfrancisco" and add your photos in it.
+For each group of photos, create a folder (i.e. "sanfrancisco") and add your photos in it.
 
-Finally, create a `info.json` and add it to the folder. This is the format:
+Finally, create a `info.json` into that folder with this format:
 ```
 {
   "name": "San Francisco",
@@ -29,6 +29,7 @@ Finally, create a `info.json` and add it to the folder. This is the format:
   ]
 }
 ```
+This is how the file hierarchy should look like:
 ![File hierarchy](http://michaelvillar.s3.amazonaws.com/images/photos_log_file_hierarchy.png)
 
 ## Test it locally
@@ -37,11 +38,13 @@ Install the necessary packages:
 brew install imagemagick
 npm install
 ```
-Then prepare your photos (this can take a while)
+Then run the script to prepare your photos -- this can take a while.
+It will resize your photos and create a global `info.json` required for the app.
+These will be saved into `public/data/`.
 ```
 ./scripts/prepare.coffee
 ```
-And finally, compile the app and run it!
+Finally, compile the app and run it!
 ```
 ./scripts/compile.coffee
 coffee web.coffee
