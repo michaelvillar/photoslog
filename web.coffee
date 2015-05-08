@@ -1,6 +1,4 @@
 compile = require('./lib/compile')
-compile()
-
 express = require('express')
 app = express()
 
@@ -18,5 +16,12 @@ app.engine('hbs', expressHbs({extname:'hbs', defaultLayout:'main.hbs'}))
 app.set('view engine', 'hbs')
 
 port = process.env.PORT || 8000
-app.listen(port)
-console.info("Listening on port " + port)
+
+compile (e) ->
+  if e?
+    console.log(e)
+    return
+
+  app.listen(port)
+  console.info("Listening on port " + port)
+

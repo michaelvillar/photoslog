@@ -1,5 +1,6 @@
 fs = require('fs')
 Mincer = require('mincer')
+mkdirp = require('mkdirp')
 
 environment = new Mincer.Environment()
 environment.appendPath('src/app')
@@ -21,10 +22,23 @@ environment.registerPostProcessor('application/javascript', JSPostProcessor)
 
 commonjsData = fs.readFileSync('scripts/data/commonjs.nomodule.js')
 
-module.exports = ->
+saveFile = (path, filename, content, callback) ->
+  mkdirp(path, (e) ->
+    if e?
+      return callback(e)
+    fs.writeFile path + "/" + filename, content, callback
+  )
+
+module.exports = (callback)->
   asset = environment.findAsset('app.nomodule.coffee')
-  fs.writeFile "public/js/app.js", commonjsData + asset.toString()
-  console.log 'Compiled app.js'
-  asset = environment.findAsset('app.styl')
-  fs.writeFile "public/css/app.css", asset.toString()
-  console.log 'Compiled app.css'
+  saveFile "public/js", "app.js", commonjsData + asset.toString(), (e) ->
+    if(e?)
+      return callback(e)
+    console.log 'Compiled app.js'
+
+    asset = environment.findAsset('app.styl')
+    saveFile "public/css", "app.css", asset.toString(), (e) ->
+      if(e?)
+        return callback(e)
+      console.log 'Compiled app.css'
+      callback(null)

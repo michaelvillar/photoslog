@@ -11,6 +11,7 @@
     "q-io": "1.x.x",
     "express": "4.x.x",
     "lodash": "2.x.x",
-    "express-handlebars": "2.x.x"
+    "express-handlebars": "2.x.x",
+    "mkdirp": "x.x.x"
   }
 }
