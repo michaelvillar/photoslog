@@ -13,5 +13,8 @@
     "lodash": "2.x.x",
     "express-handlebars": "2.x.x",
     "mkdirp": "x.x.x"
+  },
+  "scripts": {
+    "postinstall": "./scripts/compile.coffee"
   }
 }
