@@ -1,3 +1,6 @@
+compile = require('./lib/compile')
+compile()
+
 express = require('express')
 app = express()
 
