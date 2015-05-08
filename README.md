@@ -29,6 +29,7 @@ Finally, create a `info.json` and add it to the folder. This is the format:
   ]
 }
 ```
+![File hierarchy](http://michaelvillar.s3.amazonaws.com/images/photos_log_file_hierarchy.png)
 
 ## Test it locally
 Install the necessary packages:
