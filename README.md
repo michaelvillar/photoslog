@@ -1,5 +1,5 @@
 # Demo
-(http://travel.michaelvillar.com)
+[http://travel.michaelvillar.com](http://travel.michaelvillar.com)
 
 # Usage
 
@@ -45,7 +45,7 @@ And finally, compile the app and run it!
 ./scripts/compile.coffee
 coffee web.coffee
 ```
-Open (http://localhost:8000/) in your browser.
+Open [http://localhost:8000/](http://localhost:8000/) in your browser.
 
 ## Deploy it
 For the sake of simplicity, we'll use Heroku.
