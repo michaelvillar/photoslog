@@ -68,11 +68,11 @@ scroll.to = (options = {}) ->
     y: options.y
   }, {
     type: dynamics.Spring,
-    frequency: 9,
-    friction: 350,
-    anticipationStrength: 82,
-    anticipationSize: 34,
-    duration: 1000,
+    frequency: 20,
+    friction: 600,
+    anticipationStrength: 15,
+    anticipationSize: 20,
+    duration: 2000,
     change: ->
       return unless scroll.scrolling
       for view in views
