@@ -9,6 +9,7 @@ class PhotosGroupsView extends View
     super
 
     @queue = new Queue
+    @queue.maxConcurrent = 5
 
   setGroups: (groups) =>
     for group in groups
