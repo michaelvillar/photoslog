@@ -2,6 +2,7 @@ Controller = require('controller')
 View = require('view')
 Timeline = require('timeline')
 Fullscreen = require('fullscreen')
+ForkView = require('forkView')
 router = require('router')
 config = require('config')
 
@@ -18,6 +19,9 @@ class App extends Controller
 
     @fullscreen = new Fullscreen
     @view.addSubview(@fullscreen.view)
+
+    @forkView = new ForkView
+    @view.addSubview(@forkView)
 
     @bindEvents()
 
