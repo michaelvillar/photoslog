@@ -11,6 +11,8 @@ class Timeline extends Controller
   constructor: ->
     super
 
+    @scrolling = false
+
     @view = new View(className: 'mainView')
 
     @timelineView = new TimelineView
@@ -36,12 +38,16 @@ class Timeline extends Controller
 
   setSelectedGroup: (path, options = {}) =>
     options.animated ?= true
+    options.directClick ?= false
     group = @groupFromPath(path)
     @timelineView.setSelectedGroup(group)
+    @scrolling = true
     scroll.to(
       y: @photosGroupsView.groupViewY(group),
       views: [@photosGroupsView],
-      animated: options.animated
+      animated: options.animated,
+      complete: =>
+        @scrolling = false
     )
     @onScroll()
 
@@ -54,7 +60,9 @@ class Timeline extends Controller
       return group if group.path == path
 
   updateVisibleGroups: =>
-    @timelineView.setVisibleGroups(@photosGroupsView.visibleGroups())
+    @timelineView.setVisibleGroups(@photosGroupsView.visibleGroups(), {
+      autoSelect: !@scrolling
+    })
 
   # Events
   onLoad: (data) =>
@@ -68,7 +76,7 @@ class Timeline extends Controller
       @updateVisibleGroups()
 
   onScroll: =>
-    requestAnimationFrame =>
+    requestAnimationFrame (t) =>
       @updateVisibleGroups()
 
   onClick: (group) =>

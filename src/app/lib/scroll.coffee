@@ -2,6 +2,7 @@ EventDispatcher = require('eventDispatcher')
 
 views = []
 animating = false
+animationOptions = {}
 obj = null
 
 restore = (y) ->
@@ -14,6 +15,10 @@ restore = (y) ->
 
 scroll = new EventDispatcher
 
+scroll.delta =
+  x: 0
+  y: 0
+
 scroll.value =
   x: 0
   y: 0
@@ -25,9 +30,15 @@ window.addEventListener('scroll', ->
     dynamics.stop(obj)
     restore(obj.y)
     animating = false
+    animationOptions.complete?()
+    animationOptions = {}
+  oldValue = scroll.value
   scroll.value =
     x: window.scrollX
     y: window.scrollY
+  scroll.delta =
+    x: scroll.value.x - oldValue.x
+    y: scroll.value.y - oldValue.y
   scroll.trigger('change')
 )
 
@@ -52,6 +63,7 @@ scroll.to = (options = {}) ->
 
   obj = { y: scroll.value.y }
   animating = true
+  animationOptions = options
   dynamics(obj, {
     y: options.y
   }, {
@@ -71,6 +83,7 @@ scroll.to = (options = {}) ->
       scroll.trigger('change', obj.y)
     complete: ->
       return unless scroll.scrolling
+      options.complete?()
       restore(obj.y)
   })
 

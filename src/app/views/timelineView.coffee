@@ -51,7 +51,9 @@ class TimelineView extends View
     )
     scroll.on('change', @onScroll)
 
-  setVisibleGroups: (groups) =>
+  setVisibleGroups: (groups, options={}) =>
+    options.autoSelect ?= true
+
     groups.sort (a, b) ->
       a.rect.y > b.rect.y
     @visibleGroups = groups
@@ -70,21 +72,29 @@ class TimelineView extends View
 
     selectedGroup = maxGroup if !selectedGroup
 
-    if @selectedGroup != selectedGroup
+    if @selectedGroup != selectedGroup && options.autoSelect
       @setSelectedGroup(selectedGroup)
       @trigger('selectedGroupDidChange', selectedGroup)
 
     @redraw()
 
-  setSelectedGroup: (group) =>
+  setSelectedGroup: (group, timeout=null) =>
     if @selectedGroup != group
+      clearTimeout(@selectedGroupTimeout) if @selectedGroupTimeout?
+      @selectedGroupTimeout = null
+
       @selectedGroup = group
 
       if @selectedGroup
         item = @itemForGroup(@selectedGroup)
         if item and item != @selectedItem
           @selectedItem?.el.classList.remove('selected')
-          item.el.classList.add('selected')
+          if !timeout?
+            item.el.classList.add('selected')
+          else
+            @selectedGroupTimeout = setTimeout =>
+              item.el.classList.add('selected')
+            , timeout
           @selectedItem = item
       else
         @selectedItem?.el.classList.remove('selected')
@@ -221,14 +231,21 @@ class TimelineView extends View
     @updateCanvasSize()
     @center()
     @redraw()
+    @scrollDimensions = null
 
   onScroll: =>
+    if !@scrollDimensions?
+      @scrollDimensions =
+        bodyHeight: document.body.clientHeight
+        windowHeight: getWindowSize().height
+        containerHeight: @containerView.height()
+
     scrollY = scroll.value.y
-    height = document.body.clientHeight - getWindowSize().height
+    height = @scrollDimensions.bodyHeight - @scrollDimensions.windowHeight
     percent = scrollY / height
 
-    @translateY = roundf(-percent * (@containerView.height() - @marginTop), 2)
-    transform = "translate3d(0,"+@translateY+"px,0)"
+    @translateY = roundf(-percent * (@scrollDimensions.containerHeight - @marginTop), 2)
+    transform = "translateY("+@translateY+"px)"
 
     @containerView.el.style.webkitTransform = transform
     @verticalLineView.el.style.webkitTransform = transform
