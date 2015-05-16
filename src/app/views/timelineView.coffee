@@ -42,6 +42,7 @@ class TimelineView extends View
     @addSubview(@containerView)
 
     @selectedGroup = null
+    @groups = []
 
     window.addEventListener('resize', @onResize)
     window.addEventListener('load', =>
@@ -101,6 +102,7 @@ class TimelineView extends View
         @selectedItem = null
 
   setGroups: (groups) =>
+    @groups = groups
     currentYear = null
     verticalLineViewHeight = 0
 

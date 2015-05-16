@@ -28,17 +28,27 @@ class App extends Controller
   bindEvents: =>
     @timeline.on('photoClick', @onPhotoClick)
     router.on('change', @onRouterChange)
+    window.addEventListener('keydown', @onKeyDown)
 
   # Events
   onRouterChange: (state) =>
     if state?.type == 'group'
-      @timeline.setSelectedGroup(state.obj)
+      @timeline.setSelectedGroupFromPath(state.obj)
     else
-      @timeline.setSelectedGroup(null)
+      @timeline.setSelectedGroupFromPath(null)
 
   onPhotoClick: (timelineView, view, image) =>
     @fullscreen.open(image, {
       view: view
     })
+
+  onKeyDown: (e) =>
+    if e.keyCode == 38
+      @timeline.selectPrevious()
+      e.preventDefault()
+    else if e.keyCode == 40
+      @timeline.selectNext()
+      e.preventDefault()
+      e.stopPropagation()
 
 module.exports = App

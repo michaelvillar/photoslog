@@ -36,10 +36,13 @@ class Timeline extends Controller
     @photosGroupsView.on('click', @onPhotoClick)
     scroll.on('change', @onScroll)
 
-  setSelectedGroup: (path, options = {}) =>
+  setSelectedGroupFromPath: (path, options = {}) =>
+    group = @groupFromPath(path)
+    @setSelectedGroup(group, options)
+
+  setSelectedGroup: (group, options = {}) =>
     options.animated ?= true
     options.directClick ?= false
-    group = @groupFromPath(path)
     @timelineView.setSelectedGroup(group)
     @scrolling = true
     scroll.to(
@@ -51,7 +54,21 @@ class Timeline extends Controller
     )
     @onScroll()
 
-  scrollToSelectedGroup: =>
+  selectPrevious: =>
+    if @timelineView.selectedGroup?
+      index = @groups.indexOf(@timelineView.selectedGroup) - 1
+      index = Math.max(0, index)
+    else
+      index = 0
+    @setSelectedGroup(@groups[index])
+
+  selectNext: =>
+    if @timelineView.selectedGroup?
+      index = @groups.indexOf(@timelineView.selectedGroup) + 1
+      index = Math.min(@groups.length - 1, index)
+    else
+      index = 0
+    @setSelectedGroup(@groups[index])
 
   # Private
   groupFromPath: (path) =>
@@ -71,7 +88,7 @@ class Timeline extends Controller
     @photosGroupsView.setGroups(@groups)
     @timelineView.setGroups(@groups)
     if router.state?.type == 'group'
-      @setSelectedGroup(router.state.obj, { animated: false })
+      @setSelectedGroupFromPath(router.state.obj, { animated: false })
     else
       @updateVisibleGroups()
 
