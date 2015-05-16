@@ -236,6 +236,9 @@ class TimelineView extends View
     @scrollDimensions = null
 
   onScroll: =>
+    if !@isVisible()
+      return
+
     if !@scrollDimensions?
       @scrollDimensions =
         bodyHeight: document.body.clientHeight
