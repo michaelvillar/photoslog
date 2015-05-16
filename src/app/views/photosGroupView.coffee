@@ -74,6 +74,7 @@ class PhotosGroupView extends View
       imagePath: config.imagesRootPath + filePath,
       object: image
     )
+    imageView.on('click', @onClick)
     imageView
 
   loadImages: =>
@@ -90,5 +91,9 @@ class PhotosGroupView extends View
     if !@cachedFrame
       @cachedFrame = super
     @cachedFrame
+
+  # Events
+  onClick: (imageView) =>
+    window.open(imageView.options.imagePath, "_blank")
 
 module.exports = PhotosGroupView
