@@ -68,7 +68,7 @@ scroll.to = (options = {}) ->
     y: options.y
   }, {
     type: dynamics.Spring,
-    frequency: 20,
+    frequency: 10,
     friction: Math.min(900, 500 + Math.abs(options.y - scroll.value.y) / 10),
     anticipationStrength: 0,
     anticipationSize: 0,
