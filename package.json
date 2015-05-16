@@ -13,7 +13,8 @@
     "lodash": "2.x.x",
     "express-handlebars": "2.x.x",
     "mkdirp": "x.x.x",
-    "fs-watch-tree": "0.x.x"
+    "fs-watch-tree": "0.x.x",
+    "argv": "0.x.x"
   },
   "scripts": {
     "postinstall": "./scripts/compile.coffee"
