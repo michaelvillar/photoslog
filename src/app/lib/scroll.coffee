@@ -69,7 +69,7 @@ scroll.to = (options = {}) ->
   }, {
     type: dynamics.Spring,
     frequency: 20,
-    friction: 600,
+    friction: 500 + Math.abs(options.y - initial) / 10,
     anticipationStrength: 15,
     anticipationSize: 20,
     duration: 2000,
