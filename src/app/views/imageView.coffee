@@ -6,17 +6,18 @@ class ImageView extends View
   constructor: ->
     super
 
-    if @options.queue?
-      @options.queue.addJob(@load)
-    else
-      @load()
-
     @bindEvents()
 
   bindEvents: =>
     @el.addEventListener('click', @onClick)
 
-  load: (done) =>
+  load: =>
+    if @options.queue?
+      @options.queue.addJob(@_load)
+    else
+      @_load()
+
+  _load: (done) =>
     @image = new Image
     @image.src = @options.imagePath
     @image.onload = =>

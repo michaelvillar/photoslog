@@ -7,6 +7,10 @@ config = require('config')
 class PhotosGroupView extends View
   className: 'photosGroupView'
 
+  constructor: ->
+    super
+    @loaded = false
+
   render: =>
     @label = new View(tag: 'h2')
     @label.text(@options.group.name)
@@ -71,6 +75,13 @@ class PhotosGroupView extends View
       object: image
     )
     imageView
+
+  loadImages: =>
+    return if @loaded
+    @loaded = true
+    for i, image of @images
+      image.view.load()
+    @fullImage.view.load()
 
   invalidate: =>
     @cachedFrame = null

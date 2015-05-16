@@ -72,29 +72,38 @@ class PhotosGroupsView extends View
 
     index = @subviews.indexOf(view)
     cachedVisibleBounds[index] = view.visibleBounds()
+    view.loadImages()
 
-    k = 0
+    addViews = (range, incr) =>
+      k = 0
+      cont = true
 
-    for i in [index-1..0] by -1
-      break if i < 0
-      k += 1
-      view = @subviews[i]
-      visibleBounds = view.visibleBounds()
-      if visibleBounds?
-        cachedVisibleBounds[i] = visibleBounds
-        visibleGroups.push(view)
-      else
-        break
-    for i in [index+1..@subviews.length-1] by 1
-      break if i >= @subviews.length
-      k += 1
-      view = @subviews[i]
-      visibleBounds = view.visibleBounds()
-      if visibleBounds?
-        cachedVisibleBounds[i] = visibleBounds
-        visibleGroups.push(view)
-      else
-        break
+      checkView = (view) =>
+        view.loadImages()
+        if cont
+          visibleBounds = view.visibleBounds()
+          if visibleBounds?
+            cachedVisibleBounds[i] = visibleBounds
+            visibleGroups.push(view)
+          else
+            cont = false
+        unless cont
+          k += 1
+        if k > 2
+          return false
+        true
+
+      for i in range by incr
+        break if i < 0
+        break if i >= @subviews.length
+        view = @subviews[i]
+        if !checkView(view)
+          break
+
+    # Next views first
+    addViews([index+1..@subviews.length-1], 1)
+    # Then previous views
+    addViews([index-1..0], -1)
 
     visibleGroups = visibleGroups.sort (a, b) =>
       if @subviews.indexOf(a) > @subviews.indexOf(b)
