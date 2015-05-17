@@ -68,6 +68,11 @@ class View extends EventDispatcher
     if @el.parentNode?
       @triggerToSubviews('addedToDOM')
 
+  removeFromSuperview: =>
+    @superview.el.removeChild(@el)
+    @superview = null
+    @triggerToSubviews('removedFromDOM')
+
   text: (text) =>
     @el.innerHTML = text
 
@@ -97,12 +102,14 @@ class View extends EventDispatcher
     width: @width()
     height: @height()
 
+  screenFrame: =>
+    convertCoordinateToScreen(@frame())
+
   visibleBounds: =>
-    viewFrameInScreen = convertCoordinateToScreen(@frame())
     windowFrame = getWindowSize()
     windowFrame.x = 0
     windowFrame.y = 0
-    getRectsIntersection(viewFrameInScreen, windowFrame)
+    getRectsIntersection(@screenFrame(), windowFrame)
 
   isVisible: =>
     style = window.getComputedStyle(@el)

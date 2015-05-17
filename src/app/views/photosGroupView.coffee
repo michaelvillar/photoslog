@@ -94,6 +94,6 @@ class PhotosGroupView extends View
 
   # Events
   onClick: (imageView) =>
-    window.open(imageView.options.imagePath, "_blank")
+    @trigger('click', @, imageView, imageView.options.object)
 
 module.exports = PhotosGroupView
