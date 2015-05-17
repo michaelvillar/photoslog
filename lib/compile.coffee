@@ -30,13 +30,19 @@ saveFile = (path, filename, content, callback) ->
   )
 
 module.exports = (callback)->
-  asset = environment.findAsset('app.nomodule.coffee')
+  try
+    asset = environment.findAsset('app.nomodule.coffee')
+  catch e
+    return callback(e)
   saveFile "public/js", "app.js", commonjsData + asset.toString(), (e) ->
     if(e?)
       return callback(e)
     console.log 'Compiled app.js'
 
-    asset = environment.findAsset('app.styl')
+    try
+      asset = environment.findAsset('app.styl')
+    catch e
+      return callback(e)
     saveFile "public/css", "app.css", asset.toString(), (e) ->
       if(e?)
         return callback(e)
