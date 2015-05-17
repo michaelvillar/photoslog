@@ -18,8 +18,11 @@ class Fullscreen extends Controller
 
     @imageView = null
     @originalView = null
+    @hidden = true
 
   open: (image, options = {}) =>
+    return unless @hidden
+    @hidden = false
     filePath = image.files[ratio]
     @imageView = new ImageView(
       imagePath: config.imagesRootPath + filePath,
@@ -86,6 +89,7 @@ class Fullscreen extends Controller
       complete: =>
         @imageView.removeFromSuperview()
         @view.css(visibility: 'hidden')
+        @hidden = true
     })
 
     @backgroundView.animate({
