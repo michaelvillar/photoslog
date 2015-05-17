@@ -28,16 +28,36 @@ class ImageView extends View
       @onLoad()
 
   _load: (done) =>
-    @image = new Image
-    @image.src = @options.imagePath
-    @image.onload = =>
-      @onLoad()
-      done?()
+    xhr = new XMLHttpRequest()
+    xhr.onload = (e) =>
+      h = xhr.getAllResponseHeaders()
+      m = h.match(/^Content-Type\:\s*(.*?)$/mi)
+      mimeType = m[1] || 'image/png';
+
+      blob = new Blob([xhr.response], { type: mimeType })
+
+      @el.style.backgroundImage = "url(#{window.URL.createObjectURL(blob)})"
+      done()
+
+    xhr.onprogress = (e) =>
+      if e.lengthComputable
+        @setProgress(parseInt((e.loaded / e.total) * 100))
+
+    xhr.onloadstart = =>
+      @setProgress(0)
+
+    xhr.onloadend = =>
+      @setProgress(100)
+
+    xhr.open('GET', @options.imagePath, true)
+    xhr.responseType = 'arraybuffer'
+    xhr.send()
+
+  setProgress: (progress) =>
 
   onLoad: =>
     @loaded = true
     @el.style.backgroundImage = "url(#{@options.imagePath})"
-    @el.classList.add('loaded')
 
   onClick: =>
     @trigger('click', @)
