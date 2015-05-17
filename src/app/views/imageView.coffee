@@ -6,6 +6,8 @@ class ImageView extends View
   constructor: ->
     super
 
+    @disabled = false
+    @loaded = false
     @bindEvents()
 
   bindEvents: =>
@@ -17,6 +19,14 @@ class ImageView extends View
     else
       @_load(done)
 
+  setDisabled: (bool) =>
+    return if bool == @disabled
+    @disabled = bool
+    if bool
+      @el.style.backgroundImage = "none"
+    else if @loaded
+      @onLoad()
+
   _load: (done) =>
     @image = new Image
     @image.src = @options.imagePath
@@ -25,6 +35,7 @@ class ImageView extends View
       done?()
 
   onLoad: =>
+    @loaded = true
     @el.style.backgroundImage = "url(#{@options.imagePath})"
     @el.classList.add('loaded')
 

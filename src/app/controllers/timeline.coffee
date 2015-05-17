@@ -35,6 +35,7 @@ class Timeline extends Controller
     @timelineView.on('selectedGroupDidChange', @onSelectedGroupDidChange)
     @photosGroupsView.on('click', @onPhotoClick)
     scroll.on('change', @onScroll)
+    window.addEventListener('resize', @onResize)
 
   setSelectedGroupFromPath: (path, options = {}) =>
     group = @groupFromPath(path)
@@ -93,6 +94,10 @@ class Timeline extends Controller
       @updateVisibleGroups()
 
   onScroll: =>
+    requestAnimationFrame (t) =>
+      @updateVisibleGroups()
+
+  onResize: =>
     requestAnimationFrame (t) =>
       @updateVisibleGroups()
 

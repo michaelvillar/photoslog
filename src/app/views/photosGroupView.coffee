@@ -27,7 +27,7 @@ class PhotosGroupView extends View
 
   bindEvents: =>
     window.addEventListener('resize', @invalidate)
-    window.addEventListener('resize', @layout)
+    window.addEventListener('resize', @onResize)
     @on('addedToDOM', @layout)
 
   appendFullImage: (image) =>
@@ -55,12 +55,13 @@ class PhotosGroupView extends View
       image.view.el.style.width = "calc((100% - #{margins}px) * #{image.layout.widthPercent})"
 
   layout: =>
-    return if !@images[0].view.width()
+    imageWidth = @images[0].view.width()
+    return if !imageWidth
 
     margins = (@images.length - 1) * 7
 
     # Layout
-    height = @images[0].view.width() / @images[0].ratio
+    height = imageWidth / @images[0].ratio
     for i, image of @images
       image.view.el.style.height = "#{height}px"
 
@@ -92,8 +93,21 @@ class PhotosGroupView extends View
       @cachedFrame = super
     @cachedFrame
 
+  setDisabled: (bool) =>
+    for i, image of @images
+      image.view.setDisabled(bool)
+    @fullImage.view.setDisabled(bool)
+
   # Events
   onClick: (imageView) =>
     @trigger('click', @, imageView, imageView.options.object)
+
+  onResize: =>
+    @setDisabled(true)
+    clearTimeout(@resizeTimeout) if @resizeTimeout?
+    @resizeTimeout = setTimeout(=>
+      @setDisabled(false)
+    , 300)
+    @layout()
 
 module.exports = PhotosGroupView
