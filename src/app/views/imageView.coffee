@@ -1,4 +1,5 @@
 View = require('view')
+imageLoader = require('imageLoader')
 
 class ImageView extends View
   className: 'imageView'
@@ -8,7 +9,7 @@ class ImageView extends View
 
     @disabled = false
     @loaded = false
-    @blob = null
+    @loadObject = null
     @bindEvents()
 
   bindEvents: =>
@@ -26,39 +27,21 @@ class ImageView extends View
     if bool
       @el.style.backgroundImage = "none"
     else if @loaded
-      @onLoad()
+      @apply()
 
   _load: (done) =>
-    xhr = new XMLHttpRequest()
-    xhr.onload = (e) =>
-      h = xhr.getAllResponseHeaders()
-      m = h.match(/^Content-Type\:\s*(.*?)$/mi)
-      mimeType = m[1] || 'image/png';
+    @loadObject = imageLoader.get(@options.imagePath)
+    @loadObject.on('progress', =>
 
-      blob = new Blob([xhr.response], { type: mimeType })
-      @blob = window.URL.createObjectURL(blob)
-      @onLoad()
+    )
+    @loadObject.on('load', =>
+      @loaded = true
+      @apply()
       done()
+    )
 
-    xhr.onprogress = (e) =>
-      if e.lengthComputable
-        @setProgress(parseInt((e.loaded / e.total) * 100))
-
-    xhr.onloadstart = =>
-      @setProgress(0)
-
-    xhr.onloadend = =>
-      @setProgress(100)
-
-    xhr.open('GET', @options.imagePath, true)
-    xhr.responseType = 'arraybuffer'
-    xhr.send()
-
-  setProgress: (progress) =>
-
-  onLoad: =>
-    @loaded = true
-    @el.style.backgroundImage = "url(#{@blob})"
+  apply: =>
+    @el.style.backgroundImage = "url(#{@loadObject.url})"
 
   onClick: =>
     @trigger('click', @)
