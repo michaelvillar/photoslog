@@ -8,6 +8,7 @@ class ImageView extends View
 
     @disabled = false
     @loaded = false
+    @blob = null
     @bindEvents()
 
   bindEvents: =>
@@ -35,8 +36,8 @@ class ImageView extends View
       mimeType = m[1] || 'image/png';
 
       blob = new Blob([xhr.response], { type: mimeType })
-
-      @el.style.backgroundImage = "url(#{window.URL.createObjectURL(blob)})"
+      @blob = window.URL.createObjectURL(blob)
+      @onLoad()
       done()
 
     xhr.onprogress = (e) =>
@@ -57,7 +58,7 @@ class ImageView extends View
 
   onLoad: =>
     @loaded = true
-    @el.style.backgroundImage = "url(#{@options.imagePath})"
+    @el.style.backgroundImage = "url(#{@blob})"
 
   onClick: =>
     @trigger('click', @)
