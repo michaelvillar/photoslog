@@ -82,7 +82,7 @@ class Fullscreen extends Controller
       height: frame.height
     }, {
       type: dynamics.EaseInOut,
-      duration: 400,
+      duration: 300,
       complete: =>
         @imageView.removeFromSuperview()
         @view.css(visibility: 'hidden')
