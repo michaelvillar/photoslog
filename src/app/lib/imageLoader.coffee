@@ -1,5 +1,7 @@
 EventDispatcher = require('eventDispatcher')
 
+loads = {}
+
 class Load extends EventDispatcher
   constructor: ->
     super
@@ -13,7 +15,9 @@ class Load extends EventDispatcher
 
 module.exports = {}
 module.exports.get = (url) ->
-  load = new Load
+  load = loads[url]
+  return load if load?
+  loads[url] = load = new Load
 
   xhr = new XMLHttpRequest()
   xhr.onload = (e) =>

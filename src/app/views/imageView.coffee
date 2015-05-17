@@ -40,6 +40,9 @@ class ImageView extends View
       done()
     )
 
+    if @loadObject.url
+      @loadObject.trigger('load')
+
   apply: =>
     @el.style.backgroundImage = "url(#{@loadObject.url})"
 
