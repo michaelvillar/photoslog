@@ -59,11 +59,21 @@ class Fullscreen extends Controller
         friction: 500,
         anticipationStrength: 0,
         anticipationSize: 0,
-        duration: 1000,
+        duration: 1000
       })
+
+      window.addEventListener('resize', @layout)
+
+  layout: =>
+    @imageView.css({
+      width: @view.width(),
+      height: @view.height()
+    })
 
   # Events
   onClick: =>
+    window.removeEventListener('resize', @layout)
+
     frame = @originalView.screenFrame()
     @imageView.animate({
       left: frame.x,
