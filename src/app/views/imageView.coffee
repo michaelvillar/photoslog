@@ -49,7 +49,7 @@ class ImageView extends View
     if progress < 100
       frame = @loadingIndicatorFrame(progress)
       @el.style.webkitClipPath = @insetFromFrame(frame)
-    @showCover()
+      @showCover()
 
   loadingIndicatorFrame: (progress) =>
     frame = {}
