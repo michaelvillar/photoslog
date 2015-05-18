@@ -73,7 +73,8 @@ class PhotosGroupView extends View
       className: image.type,
       queue: @options.queue,
       imagePath: config.imagesRootPath + filePath,
-      object: image
+      object: image,
+      loadingIndicator: true
     )
     imageView.on('click', @onClick)
     imageView

@@ -1,6 +1,7 @@
 View = require('view')
 scroll = require('scroll')
 months = require('months')
+roundf = require('tools').roundf
 
 pixelRatio = window.devicePixelRatio ? 1
 
@@ -19,10 +20,6 @@ getWindowSize = do ->
   gen()
   window.addEventListener('resize', gen)
   -> size
-
-roundf = (v, decimal) ->
-  d = Math.pow(10, decimal)
-  return Math.round(v * d) / d
 
 class TimelineView extends View
   className: 'timelineView'

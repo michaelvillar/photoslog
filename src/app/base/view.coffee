@@ -42,7 +42,10 @@ class View extends EventDispatcher
 
   constructor: (@options = {}) ->
     super
-    @el = @el or @options.el or document.createElement(@options['tag'] || @tag)
+    @el = @el or @options.el or (
+      if @xmlns? then document.createElementNS(@xmlns, @options['tag'] || @tag)
+      else document.createElement(@options['tag'] || @tag)
+    )
 
     for className in [@className, @options.className]
       for c in (className ? '').split(' ')
