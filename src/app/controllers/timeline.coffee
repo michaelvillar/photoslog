@@ -87,15 +87,21 @@ class Timeline extends Controller
     o = @images.filter (i) ->
       i.image == image
     index = @images.indexOf(o[0])
-    index -= 1 if index > 0
-    @images[index]
+    if index > 0
+      index -= 1
+      @images[index]
+    else
+      null
 
   nextImage: (image) =>
     o = @images.filter (i) ->
       i.image == image
     index = @images.indexOf(o[0])
-    index += 1 if index < @images.length - 1
-    @images[index]
+    if index < @images.length - 1
+      index += 1
+      @images[index]
+    else
+      null
 
   # Private
   groupFromPath: (path) =>

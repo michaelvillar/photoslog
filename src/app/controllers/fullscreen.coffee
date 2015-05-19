@@ -85,11 +85,52 @@ class Fullscreen extends Controller
       left: 0,
       top: 0,
       width: @view.width(),
-      height: @view.height()
+      height: @view.height(),
+      translateX: options.direction * @view.width()
     })
     @imageView.load =>
-      oldImageView.removeFromSuperview()
+      oldImageView.animate({
+        translateX: -options.direction * @view.width()
+      }, {
+        type: dynamics.Spring,
+        frequency: 10,
+        friction: 500,
+        anticipationStrength: 0,
+        anticipationSize: 0,
+        duration: 1000,
+        complete: =>
+          oldImageView.removeFromSuperview()
+      })
       @view.addSubview(@imageView)
+      @imageView.animate({
+        translateX: 0
+      }, {
+        type: dynamics.Spring,
+        frequency: 10,
+        friction: 500,
+        anticipationStrength: 0,
+        anticipationSize: 0,
+        duration: 1000
+      })
+
+  bounce: (direction) =>
+    @imageView.animate({
+      translateX: -direction * 50
+    }, {
+      type: dynamics.EaseInOut,
+      duration: 100,
+      complete: =>
+        @imageView.animate({
+         translateX: 0
+        }, {
+          type: dynamics.Spring,
+          frequency: 10,
+          friction: 300,
+          anticipationStrength: 0,
+          anticipationSize: 0,
+          duration: 600
+        })
+    })
 
   layout: =>
     @imageView.css({
@@ -124,12 +165,24 @@ class Fullscreen extends Controller
     })
 
   previous: =>
+    return if @time and @time > Date.now() - 200
+    @time = Date.now()
     o = @delegate?.previousImage(@image)
-    @slide(o.image, o.options)
+    if o?
+      o.options.direction = -1
+      @slide(o.image, o.options)
+    else
+      @bounce(-1)
 
   next: =>
+    return if @time and @time > Date.now() - 200
+    @time = Date.now()
     o = @delegate?.nextImage(@image)
-    @slide(o.image, o.options)
+    if o?
+      o.options.direction = 1
+      @slide(o.image, o.options)
+    else
+      @bounce(1)
 
   # Events
   onClick: =>
