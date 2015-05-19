@@ -126,6 +126,10 @@ class PhotosGroupsView extends View
     else
       0
 
+  imageViewForImage: (image, group) =>
+    view = @viewForGroup(group)
+    view.imageViewForImage(image)
+
   # Private
   viewForGroup: (group) =>
     for view in @subviews

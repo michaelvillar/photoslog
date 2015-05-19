@@ -56,20 +56,46 @@ class Timeline extends Controller
     @onScroll()
 
   selectPrevious: =>
+    @setSelectedGroup(@previousGroup())
+
+  selectNext: =>
+    @setSelectedGroup(@nextGroup())
+
+  previousGroup: =>
     if @timelineView.selectedGroup?
       index = @groups.indexOf(@timelineView.selectedGroup) - 1
       index = Math.max(0, index)
     else
       index = 0
-    @setSelectedGroup(@groups[index])
+    @groups[index]
 
-  selectNext: =>
+  nextGroup: =>
     if @timelineView.selectedGroup?
       index = @groups.indexOf(@timelineView.selectedGroup) + 1
       index = Math.min(@groups.length - 1, index)
     else
       index = 0
-    @setSelectedGroup(@groups[index])
+    @groups[index]
+
+  currentImage: =>
+    image = @timelineView.selectedGroup.images[0]
+    o = @images.filter (i) ->
+      i.image == image
+    o[0]
+
+  previousImage: (image) =>
+    o = @images.filter (i) ->
+      i.image == image
+    index = @images.indexOf(o[0])
+    index -= 1 if index > 0
+    @images[index]
+
+  nextImage: (image) =>
+    o = @images.filter (i) ->
+      i.image == image
+    index = @images.indexOf(o[0])
+    index += 1 if index < @images.length - 1
+    @images[index]
 
   # Private
   groupFromPath: (path) =>
@@ -88,6 +114,17 @@ class Timeline extends Controller
 
     @photosGroupsView.setGroups(@groups)
     @timelineView.setGroups(@groups)
+
+    @images = []
+    for group in @groups
+      for image in group.images
+        @images.push({
+          image: image,
+          options: {
+            view: @photosGroupsView.imageViewForImage(image, group)
+          }
+        })
+
     if router.state?.type == 'group'
       @setSelectedGroupFromPath(router.state.obj, { animated: false })
     else

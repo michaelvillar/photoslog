@@ -23,6 +23,7 @@ class Fullscreen extends Controller
   open: (image, options = {}) =>
     return unless @hidden
     @hidden = false
+    @image = image
     filePath = image.files[ratio]
     @imageView = new ImageView(
       imagePath: config.imagesRootPath + filePath,
@@ -66,6 +67,29 @@ class Fullscreen extends Controller
       })
 
       window.addEventListener('resize', @layout)
+      window.addEventListener('keydown', @onKeyDown)
+
+  slide: (image, options={}) =>
+    return if @hidden
+
+    oldImageView = @imageView
+
+    @image = image
+    filePath = image.files[ratio]
+    @originalView = options.view
+    @imageView = new ImageView(
+      imagePath: config.imagesRootPath + filePath,
+      object: image
+    )
+    @imageView.css({
+      left: 0,
+      top: 0,
+      width: @view.width(),
+      height: @view.height()
+    })
+    @imageView.load =>
+      oldImageView.removeFromSuperview()
+      @view.addSubview(@imageView)
 
   layout: =>
     @imageView.css({
@@ -73,9 +97,9 @@ class Fullscreen extends Controller
       height: @view.height()
     })
 
-  # Events
-  onClick: =>
+  close: =>
     window.removeEventListener('resize', @layout)
+    window.removeEventListener('keydown', @onKeyDown)
 
     frame = @originalView.screenFrame()
     @imageView.animate({
@@ -98,5 +122,31 @@ class Fullscreen extends Controller
       type: dynamics.EaseInOut,
       duration: 200
     })
+
+  previous: =>
+    o = @delegate?.previousImage(@image)
+    @slide(o.image, o.options)
+
+  next: =>
+    o = @delegate?.nextImage(@image)
+    @slide(o.image, o.options)
+
+  # Events
+  onClick: =>
+    @close()
+
+  onKeyDown: (e) =>
+    if e.keyCode == 27 or e.keyCode == 32
+      @close()
+      e.preventDefault()
+      e.stopPropagation()
+    else if e.keyCode == 39 or e.keyCode == 40
+      @next()
+      e.preventDefault()
+      e.stopPropagation()
+    else if e.keyCode == 37 or e.keyCode == 38
+      @previous()
+      e.preventDefault()
+      e.stopPropagation()
 
 module.exports = Fullscreen

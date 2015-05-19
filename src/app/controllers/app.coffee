@@ -18,6 +18,7 @@ class App extends Controller
     @view.addSubview(@timeline.view)
 
     @fullscreen = new Fullscreen
+    @fullscreen.delegate = @timeline
     @view.addSubview(@fullscreen.view)
 
     @forkView = new ForkView
@@ -43,12 +44,19 @@ class App extends Controller
     })
 
   onKeyDown: (e) =>
-    if e.keyCode == 38
-      @timeline.selectPrevious()
-      e.preventDefault()
-    else if e.keyCode == 40
-      @timeline.selectNext()
-      e.preventDefault()
-      e.stopPropagation()
+    if @fullscreen.hidden
+      if e.keyCode == 37 or e.keyCode == 38
+        @timeline.selectPrevious()
+        e.preventDefault()
+        e.stopPropagation()
+      else if e.keyCode == 39 or e.keyCode == 40
+        @timeline.selectNext()
+        e.preventDefault()
+        e.stopPropagation()
+      else if e.keyCode == 32
+        o = @timeline.currentImage()
+        @fullscreen.open(o.image, o.options)
+        e.preventDefault()
+        e.stopPropagation()
 
 module.exports = App

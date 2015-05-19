@@ -99,6 +99,11 @@ class PhotosGroupView extends View
       image.view.setDisabled(bool)
     @fullImage.view.setDisabled(bool)
 
+  imageViewForImage: (image) =>
+    for view in @subviews
+      return view if view.options.object == image
+    return null
+
   # Events
   onClick: (imageView) =>
     @trigger('click', @, imageView, imageView.options.object)
