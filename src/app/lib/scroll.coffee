@@ -1,4 +1,5 @@
 EventDispatcher = require('eventDispatcher')
+dynamics = require('dynamics')
 
 views = []
 animating = false
@@ -64,11 +65,11 @@ scroll.to = (options = {}) ->
   obj = { y: scroll.value.y }
   animating = true
   animationOptions = options
-  dynamics(obj, {
+  dynamics.animate(obj, {
     y: options.y
   }, {
-    type: dynamics.Spring,
-    frequency: 10,
+    type: dynamics.spring,
+    frequency: 200,
     friction: Math.min(900, 500 + Math.abs(options.y - scroll.value.y) / 10),
     anticipationStrength: 0,
     anticipationSize: 0,

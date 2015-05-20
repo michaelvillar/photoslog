@@ -12,7 +12,7 @@ class JSPostProcessor
     if(this.path.match(/nomodule/))
       return this.data
     pathArgs = this.path.split("/")
-    name = pathArgs[pathArgs.length - 1].replace(".coffee","")
+    name = pathArgs[pathArgs.length - 1].replace(".coffee","").replace(".js","")
     data = 'this.require.define({ "'+name+'" : function(exports, require, module) {'
     data += this.data
     data += '}});'

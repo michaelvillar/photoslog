@@ -2,6 +2,7 @@ View = require('view')
 SVGView = require('svgView')
 imageLoader = require('imageLoader')
 roundf = require('tools').roundf
+dynamics = require('dynamics')
 
 class ImageView extends View
   className: 'imageView'
@@ -73,14 +74,14 @@ class ImageView extends View
 
       cover = @cover
       frame.opacity = 1
-      dynamics(frame, {
+      dynamics.animate(frame, {
         x: 0,
         y: 0
         width: @width(),
         height: @height(),
         opacity: 0
       }, {
-        type: dynamics.EaseInOut
+        type: dynamics.easeInOut
         duration: 1000,
         friction: 200,
         change: =>

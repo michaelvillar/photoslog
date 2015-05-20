@@ -1,6 +1,6 @@
 EventDispatcher = require('eventDispatcher')
 scroll = require('scroll')
-require('dynamics.js')
+dynamics = require('dynamics')
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
@@ -124,6 +124,6 @@ class View extends EventDispatcher
 
   animate: =>
     args = Array.prototype.slice.call(arguments)
-    dynamics.apply(dynamics, [@el].concat(args))
+    dynamics.animate.apply(dynamics, [@el].concat(args))
 
 module.exports = View

@@ -3,6 +3,8 @@ View = require('view')
 ImageView = require('imageView')
 ratio = require('ratio')
 config = require('config')
+scroll = require('scroll')
+dynamics = require('dynamics')
 
 class Fullscreen extends Controller
   constructor: ->
@@ -43,12 +45,13 @@ class Fullscreen extends Controller
 
     @imageView.load =>
       @view.addSubview(@imageView)
+      @originalView.css(visibility: 'hidden')
       @view.css(visibility: 'visible')
 
       @backgroundView.animate({
         opacity: 1
       }, {
-        type: dynamics.EaseInOut,
+        type: dynamics.easeInOut,
         duration: 200
       })
 
@@ -58,8 +61,8 @@ class Fullscreen extends Controller
         width: @view.width(),
         height: @view.height()
       }, {
-        type: dynamics.Spring,
-        frequency: 10,
+        type: dynamics.spring,
+        frequency: 200,
         friction: 500,
         anticipationStrength: 0,
         anticipationSize: 0,
@@ -76,8 +79,9 @@ class Fullscreen extends Controller
 
     @image = image
     filePath = image.files[ratio]
+    @originalView?.css(visibility: 'visible')
     @originalView = options.view
-    @imageView = new ImageView(
+    @imageView = imageView = new ImageView(
       imagePath: config.imagesRootPath + filePath,
       object: image
     )
@@ -92,8 +96,8 @@ class Fullscreen extends Controller
       oldImageView.animate({
         translateX: -options.direction * @view.width()
       }, {
-        type: dynamics.Spring,
-        frequency: 10,
+        type: dynamics.spring,
+        frequency: 200,
         friction: 500,
         anticipationStrength: 0,
         anticipationSize: 0,
@@ -101,12 +105,13 @@ class Fullscreen extends Controller
         complete: =>
           oldImageView.removeFromSuperview()
       })
-      @view.addSubview(@imageView)
-      @imageView.animate({
+      @view.addSubview(imageView)
+      options.view.css(visibility: 'hidden')
+      imageView.animate({
         translateX: 0
       }, {
-        type: dynamics.Spring,
-        frequency: 10,
+        type: dynamics.spring,
+        frequency: 200,
         friction: 500,
         anticipationStrength: 0,
         anticipationSize: 0,
@@ -117,14 +122,14 @@ class Fullscreen extends Controller
     @imageView.animate({
       translateX: -direction * 50
     }, {
-      type: dynamics.EaseInOut,
+      type: dynamics.easeInOut,
       duration: 100,
       complete: =>
         @imageView.animate({
          translateX: 0
         }, {
-          type: dynamics.Spring,
-          frequency: 10,
+          type: dynamics.spring,
+          frequency: 200,
           friction: 300,
           anticipationStrength: 0,
           anticipationSize: 0,
@@ -143,16 +148,31 @@ class Fullscreen extends Controller
     window.removeEventListener('keydown', @onKeyDown)
 
     frame = @originalView.screenFrame()
+    originalView = @originalView
+
+    body = new View(el: document.body)
+    @imageView.el.classList.add('mainImageView')
+    body.addSubview(@imageView)
+    @imageView.css({
+      top: scroll.value.y
+    })
+
+    imageView = @imageView
     @imageView.animate({
       left: frame.x,
-      top: frame.y,
+      top: scroll.value.y + frame.y,
       width: frame.width,
       height: frame.height
     }, {
-      type: dynamics.EaseInOut,
-      duration: 300,
+      type: dynamics.spring,
+      frequency: 200,
+      friction: 500,
+      anticipationStrength: 0,
+      anticipationSize: 0,
+      duration: 1000,
       complete: =>
-        @imageView.removeFromSuperview()
+        originalView.css(visibility: 'visible')
+        imageView.removeFromSuperview()
         @view.css(visibility: 'hidden')
         @hidden = true
     })
@@ -160,7 +180,7 @@ class Fullscreen extends Controller
     @backgroundView.animate({
       opacity: 0
     }, {
-      type: dynamics.EaseInOut,
+      type: dynamics.easeInOut,
       duration: 200
     })
 
