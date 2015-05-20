@@ -37,6 +37,11 @@ class Fullscreen extends Controller
     @hidden = false
     @image = image
     filePath = image.files[ratio]
+
+    @imageView?.css(
+      zIndex: 9
+    )
+
     @imageView = new ImageView(
       imagePath: config.imagesRootPath + filePath,
       object: image
@@ -116,7 +121,7 @@ class Fullscreen extends Controller
       duration: 100,
       complete: =>
         @imageView.animate({
-         translateX: 0
+          translateX: 0
         }, springOptions)
     })
 
@@ -127,8 +132,10 @@ class Fullscreen extends Controller
     })
 
   close: =>
+    return if @hidden
     window.removeEventListener('resize', @layout)
     window.removeEventListener('keydown', @onKeyDown)
+    @hidden = true
 
     frame = @originalView.screenFrame()
     originalView = @originalView
@@ -148,10 +155,11 @@ class Fullscreen extends Controller
       height: frame.height
     }, tools.merge(springOptions, {
       complete: =>
-        originalView.css(visibility: 'visible')
+        if @hidden || originalView != @originalView
+          originalView.css(visibility: 'visible')
         imageView.removeFromSuperview()
-        @view.css(visibility: 'hidden')
-        @hidden = true
+        if @hidden
+          @view.css(visibility: 'hidden')
     }))
 
     @backgroundView.animate({
