@@ -256,7 +256,11 @@
     y = animation.curve(tt);
     properties = {};
     if (tt >= 1) {
-      properties = animation.properties.end;
+      if (animation.curve.initialForce) {
+        properties = animation.properties.start;
+      } else {
+        properties = animation.properties.end;
+      }
     } else {
       _ref = animation.properties.start;
       for (key in _ref) {
@@ -325,11 +329,9 @@
         b = Math.acos(1 / A(yS));
         a = (Math.acos(1 / A(y0)) - b) / (frequency * (-s));
       } else {
-        A = (function(_this) {
-          return function(t) {
-            return Math.pow(friction / 10, -t) * (1 - t);
-          };
-        })(this);
+        A = function(t) {
+          return Math.pow(friction / 10, -t) * (1 - t);
+        };
         b = 0;
         a = 1;
       }
@@ -337,6 +339,29 @@
       angle = frequency * (t - s) * a + b;
       return 1 - (At * Math.cos(angle));
     };
+  };
+
+  dynamics.bounce = function(options) {
+    var fn, frequency, friction;
+    if (options == null) {
+      options = {};
+    }
+    applyDefaults(options, this.defaults);
+    frequency = Math.max(1, options.frequency / 20);
+    friction = Math.pow(20, options.friction / 100);
+    fn = function(t) {
+      var A, At, a, angle, b;
+      A = function(t) {
+        return Math.pow(friction / 10, -t) * (1 - t);
+      };
+      b = -3.14 / 2;
+      a = 1;
+      At = A(t);
+      angle = frequency * t * a + b;
+      return At * Math.cos(angle);
+    };
+    fn.initialForce = true;
+    return fn;
   };
 
   dynamics.gravity = function(options) {
@@ -425,6 +450,7 @@
       return v;
     };
     fn.duration = Math.round(10000 / gravity * L);
+    fn.initialForce = options.initialForce;
     return fn;
   };
 
@@ -606,6 +632,11 @@
     friction: 200,
     anticipationStrength: 0,
     anticipationSize: 0
+  };
+
+  dynamics.bounce.defaults = {
+    frequency: 300,
+    friction: 200
   };
 
   dynamics.gravity.defaults = {

@@ -115,14 +115,12 @@ class Fullscreen extends Controller
 
   bounce: (direction) =>
     @imageView.animate({
-      translateX: -direction * 50
+      translateX: -direction * 100
     }, {
-      type: dynamics.easeInOut,
-      duration: 100,
-      complete: =>
-        @imageView.animate({
-          translateX: 0
-        }, springOptions)
+      type: dynamics.bounce,
+      frequency: 200,
+      friction: 200,
+      duration: 700
     })
 
   layout: =>
