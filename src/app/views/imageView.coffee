@@ -61,7 +61,7 @@ class ImageView extends View
     frame
 
   insetFromFrame: (frame) =>
-    "inset(#{roundf(frame.y, 2)}px #{roundf(frame.x, 2)}px #{roundf(frame.y, 2)}px #{roundf(frame.x, 2)}px)"
+    "inset(#{roundf(frame.y, 2)}px #{roundf(frame.x, 2)}px #{roundf(@height() - frame.y - frame.height, 2)}px #{roundf(@width() - frame.x - frame.width, 2)}px)"
 
   show: (done) =>
     return unless @options.loadingIndicator
@@ -85,8 +85,7 @@ class ImageView extends View
         duration: 1000,
         friction: 200,
         change: =>
-          inset = "inset(#{roundf(frame.y, 2)}px #{roundf(frame.x, 2)}px #{roundf(frame.y, 2)}px #{roundf(frame.x, 2)}px)"
-          @el.style.webkitClipPath = inset
+          @el.style.webkitClipPath = @insetFromFrame(frame)
           cover.css(opacity: frame.opacity)
         complete: =>
           cover.removeFromSuperview()
