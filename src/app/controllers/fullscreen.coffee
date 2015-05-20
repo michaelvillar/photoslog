@@ -5,6 +5,16 @@ ratio = require('ratio')
 config = require('config')
 scroll = require('scroll')
 dynamics = require('dynamics')
+tools = require('tools')
+
+springOptions = {
+  type: dynamics.spring,
+  frequency: 200,
+  friction: 500,
+  anticipationStrength: 0,
+  anticipationSize: 0,
+  duration: 1000
+}
 
 class Fullscreen extends Controller
   constructor: ->
@@ -60,14 +70,7 @@ class Fullscreen extends Controller
         top: 0,
         width: @view.width(),
         height: @view.height()
-      }, {
-        type: dynamics.spring,
-        frequency: 200,
-        friction: 500,
-        anticipationStrength: 0,
-        anticipationSize: 0,
-        duration: 1000
-      })
+      }, springOptions)
 
       window.addEventListener('resize', @layout)
       window.addEventListener('keydown', @onKeyDown)
@@ -95,28 +98,15 @@ class Fullscreen extends Controller
     @imageView.load =>
       oldImageView.animate({
         translateX: -options.direction * @view.width()
-      }, {
-        type: dynamics.spring,
-        frequency: 200,
-        friction: 500,
-        anticipationStrength: 0,
-        anticipationSize: 0,
-        duration: 1000,
+      }, tools.merge(springOptions, {
         complete: =>
           oldImageView.removeFromSuperview()
-      })
+      }))
       @view.addSubview(imageView)
       options.view.css(visibility: 'hidden')
       imageView.animate({
         translateX: 0
-      }, {
-        type: dynamics.spring,
-        frequency: 200,
-        friction: 500,
-        anticipationStrength: 0,
-        anticipationSize: 0,
-        duration: 1000
-      })
+      }, springOptions)
 
   bounce: (direction) =>
     @imageView.animate({
@@ -127,14 +117,7 @@ class Fullscreen extends Controller
       complete: =>
         @imageView.animate({
          translateX: 0
-        }, {
-          type: dynamics.spring,
-          frequency: 200,
-          friction: 300,
-          anticipationStrength: 0,
-          anticipationSize: 0,
-          duration: 600
-        })
+        }, springOptions)
     })
 
   layout: =>
@@ -163,19 +146,13 @@ class Fullscreen extends Controller
       top: scroll.value.y + frame.y,
       width: frame.width,
       height: frame.height
-    }, {
-      type: dynamics.spring,
-      frequency: 200,
-      friction: 500,
-      anticipationStrength: 0,
-      anticipationSize: 0,
-      duration: 1000,
+    }, tools.merge(springOptions, {
       complete: =>
         originalView.css(visibility: 'visible')
         imageView.removeFromSuperview()
         @view.css(visibility: 'hidden')
         @hidden = true
-    })
+    }))
 
     @backgroundView.animate({
       opacity: 0
