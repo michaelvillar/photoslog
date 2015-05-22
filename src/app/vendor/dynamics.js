@@ -302,7 +302,7 @@
   };
 
   dynamics.spring = function(options) {
-    var decal, frequency, friction, s;
+    var A1, A2, decal, frequency, friction, s;
     if (options == null) {
       options = {};
     }
@@ -311,27 +311,29 @@
     friction = Math.pow(20, options.friction / 100);
     s = options.anticipationSize / 1000;
     decal = Math.max(0, s);
+    A1 = function(t) {
+      var M, a, b, x0, x1;
+      M = 0.8;
+      x0 = s / (1 - s);
+      x1 = 0;
+      b = (x0 - (M * x1)) / (x0 - x1);
+      a = (M - b) / x0;
+      return (a * t * options.anticipationStrength / 100) + b;
+    };
+    A2 = function(t) {
+      return Math.pow(friction / 10, -t) * (1 - t);
+    };
     return function(t) {
       var A, At, a, angle, b, frictionT, y0, yS;
       frictionT = (t / (1 - s)) - (s / (1 - s));
       if (t < s) {
-        A = function(t) {
-          var M, a, b, x0, x1;
-          M = 0.8;
-          x0 = s / (1 - s);
-          x1 = 0;
-          b = (x0 - (M * x1)) / (x0 - x1);
-          a = (M - b) / x0;
-          return (a * t * options.anticipationStrength / 100) + b;
-        };
         yS = (s / (1 - s)) - (s / (1 - s));
         y0 = (0 / (1 - s)) - (s / (1 - s));
-        b = Math.acos(1 / A(yS));
-        a = (Math.acos(1 / A(y0)) - b) / (frequency * (-s));
+        b = Math.acos(1 / A1(yS));
+        a = (Math.acos(1 / A1(y0)) - b) / (frequency * (-s));
+        A = A1;
       } else {
-        A = function(t) {
-          return Math.pow(friction / 10, -t) * (1 - t);
-        };
+        A = A2;
         b = 0;
         a = 1;
       }
@@ -342,18 +344,18 @@
   };
 
   dynamics.bounce = function(options) {
-    var fn, frequency, friction;
+    var A, fn, frequency, friction;
     if (options == null) {
       options = {};
     }
     applyDefaults(options, this.defaults);
     frequency = Math.max(1, options.frequency / 20);
     friction = Math.pow(20, options.friction / 100);
+    A = function(t) {
+      return Math.pow(friction / 10, -t) * (1 - t);
+    };
     fn = function(t) {
-      var A, At, a, angle, b;
-      A = function(t) {
-        return Math.pow(friction / 10, -t) * (1 - t);
-      };
+      var At, a, angle, b;
       b = -3.14 / 2;
       a = 1;
       At = A(t);
