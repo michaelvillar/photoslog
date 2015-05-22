@@ -114,6 +114,7 @@ class Fullscreen extends Controller
       }, springOptions)
 
   bounce: (direction) =>
+    @imageView.css(translateX: 0)
     @imageView.animate({
       translateX: -direction * 100
     }, {
