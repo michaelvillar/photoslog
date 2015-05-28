@@ -135,6 +135,7 @@ class Timeline extends Controller
       @setSelectedGroupFromPath(router.state.obj, { animated: false })
     else
       @updateVisibleGroups()
+    @trigger('load')
 
   onScroll: =>
     requestAnimationFrame (t) =>

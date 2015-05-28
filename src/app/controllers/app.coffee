@@ -28,6 +28,7 @@ class App extends Controller
 
   bindEvents: =>
     @timeline.on('photoClick', @onPhotoClick)
+    @timeline.on('load', @onLoad)
     router.on('change', @onRouterChange)
     window.addEventListener('keydown', @onKeyDown)
 
@@ -58,5 +59,8 @@ class App extends Controller
         @fullscreen.open(o.image, o.options)
         e.preventDefault()
         e.stopPropagation()
+
+  onLoad: =>
+    @options.onLoad?()
 
 module.exports = App
