@@ -95,6 +95,7 @@ class PhotosGroupView extends View
     @cachedFrame
 
   setDisabled: (bool) =>
+    @el.classList.toggle('disabled', bool)
     for i, image of @images
       image.view.setDisabled(bool)
     @fullImage.view.setDisabled(bool)
@@ -113,7 +114,7 @@ class PhotosGroupView extends View
     clearTimeout(@resizeTimeout) if @resizeTimeout?
     @resizeTimeout = setTimeout(=>
       @setDisabled(false)
+      @layout()
     , 300)
-    @layout()
 
 module.exports = PhotosGroupView
