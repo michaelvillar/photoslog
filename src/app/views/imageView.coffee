@@ -26,9 +26,9 @@ class ImageView extends View
 
   load: (done) =>
     if @options.queue?
-      @options.queue.addJob(@_load)
+      @options.queue.addJob(@loadJob)
     else
-      @_load(done)
+      @loadJob(done)
 
   setDisabled: (bool) =>
     return if bool == @disabled
@@ -46,6 +46,7 @@ class ImageView extends View
 
   setLoadingProgress: (progress) =>
     return unless @options.loadingIndicator
+    return if @loaded
 
     if progress < 100
       frame = @loadingIndicatorFrame(progress)
@@ -97,7 +98,7 @@ class ImageView extends View
       done()
     @cover = null
 
-  _load: (done) =>
+  loadJob: (done) =>
     @loadObject = imageLoader.get(@options.imagePath)
     @loadObject.on('progress', =>
       @setLoadingProgress(@loadObject.progress)
