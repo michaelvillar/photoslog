@@ -116,6 +116,7 @@ class TimelineView extends View
           addYearView(currentYear)
 
         itemView = new View(tag: 'a', group: group)
+        itemView.cacheFrame = true
         itemView.el.addEventListener('click', =>
           @trigger('click', group)
         )
@@ -231,6 +232,8 @@ class TimelineView extends View
     @center()
     @redraw()
     @scrollDimensions = null
+    for view in @containerView.subviews
+      view.invalidateCachedFrame()
 
   onScroll: =>
     if !@isVisible()

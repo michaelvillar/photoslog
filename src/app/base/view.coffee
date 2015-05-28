@@ -37,6 +37,12 @@ getRectsIntersection = (a, b) ->
     return { x: x, y: y, width: num1 - x, height: num2 - y }
   null
 
+getValueAndCache = (prop, fn) ->
+  return @cachedFrameValues[prop] if @cachedFrameValues[prop]?
+  value = fn()
+  @cachedFrameValues[prop] = value if @cacheFrame
+  value
+
 class View extends EventDispatcher
   tag: 'div'
 
@@ -52,6 +58,9 @@ class View extends EventDispatcher
         @el.classList.add(c) if c != ''
 
     @subviews = []
+
+    @cacheFrame = false
+    @cachedFrameValues = {}
 
     @render?()
     @bindEvents?()
@@ -79,17 +88,20 @@ class View extends EventDispatcher
   text: (text) =>
     @el.innerHTML = text
 
+  invalidateCachedFrame: =>
+    @cachedFrameValues = {}
+
   height: =>
-    @el.clientHeight
+    getValueAndCache.call(@, 'height', => @el.clientHeight)
 
   width: =>
-    @el.clientWidth
+    getValueAndCache.call(@, 'width', => @el.clientWidth)
 
   x: =>
-    getOffset(@el, 'offsetLeft')
+    getValueAndCache.call(@, 'x', => getOffset(@el, 'offsetLeft'))
 
   y: =>
-    getOffset(@el, 'offsetTop')
+    getValueAndCache.call(@, 'y', => getOffset(@el, 'offsetTop'))
 
   position: =>
     x: @x()

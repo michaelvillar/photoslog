@@ -10,6 +10,7 @@ class PhotosGroupView extends View
   constructor: ->
     super
     @loaded = false
+    @cacheFrame = true
 
   render: =>
     @label = new View(tag: 'h2')
@@ -66,6 +67,7 @@ class PhotosGroupView extends View
       image.view.el.style.height = "#{height}px"
 
     @fullImage.view.el.style.height = "#{@fullImage.size.height / @fullImage.size.width * @fullImage.view.width()}px"
+    @invalidateCachedFrame()
 
   createImageView: (image, type) =>
     imageRatio = if type == 'full' then ratio else "1x"
@@ -86,14 +88,6 @@ class PhotosGroupView extends View
     for i, image of @images
       image.view.load()
     @fullImage.view.load()
-
-  invalidate: =>
-    @cachedFrame = null
-
-  frame: =>
-    if !@cachedFrame
-      @cachedFrame = super
-    @cachedFrame
 
   setDisabled: (bool) =>
     @el.classList.toggle('disabled', bool)
