@@ -32,7 +32,7 @@ class PhotosGroupView extends View
 
   appendFullImage: (image) =>
     @fullImage = image
-    image.view = @createImageView(image)
+    image.view = @createImageView(image, 'full')
     @addSubview(image.view)
 
   appendRowImages: (images) =>
@@ -50,7 +50,7 @@ class PhotosGroupView extends View
 
     # Render
     for i, image of @images
-      image.view = @createImageView(image)
+      image.view = @createImageView(image, 'row')
       @addSubview(image.view)
       image.view.el.style.width = "calc((100% - #{margins}px) * #{image.layout.widthPercent})"
 
@@ -67,10 +67,11 @@ class PhotosGroupView extends View
 
     @fullImage.view.el.style.height = "#{@fullImage.size.height / @fullImage.size.width * @fullImage.view.width()}px"
 
-  createImageView: (image) =>
-    filePath = image.files[ratio]
+  createImageView: (image, type) =>
+    imageRatio = if type == 'full' then ratio else "1x"
+    filePath = image.files[imageRatio]
     imageView = new ImageView(
-      className: image.type,
+      className: type,
       queue: @options.queue,
       imagePath: config.imagesRootPath + filePath,
       object: image,
