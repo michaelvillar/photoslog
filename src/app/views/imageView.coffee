@@ -51,6 +51,8 @@ class ImageView extends View
       @hiddenCover = false
 
   setLoadingProgress: (progress) =>
+    @trigger('progress', progress)
+
     return unless @options.loadingIndicator
     return if @loaded
 

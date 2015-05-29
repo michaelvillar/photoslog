@@ -1,6 +1,7 @@
 Controller = require('controller')
 View = require('view')
 ImageView = require('imageView')
+LoadingView = require('loadingView')
 ratio = require('ratio')
 config = require('config')
 scroll = require('scroll')
@@ -27,6 +28,9 @@ class Fullscreen extends Controller
     @backgroundView = new View(className: 'backgroundView')
     @backgroundView.css(opacity: 0)
     @view.addSubview(@backgroundView)
+
+    @loadingView = new LoadingView
+    @view.addSubview(@loadingView)
 
     @imageView = null
     @originalView = null
@@ -58,7 +62,12 @@ class Fullscreen extends Controller
       scaleY: 1
     )
 
+    @applyProgress(@imageView)
+
+    @loading = true
     @imageView.load =>
+      @loading = false
+      @loadingView.setValue(0)
       @view.addSubview(@imageView)
       @originalView.css(visibility: 'hidden')
       @view.css(visibility: 'visible')
@@ -82,6 +91,7 @@ class Fullscreen extends Controller
 
   slide: (image, options={}) =>
     return if @hidden
+    return if @loading
 
     oldImageView = @imageView
 
@@ -100,7 +110,11 @@ class Fullscreen extends Controller
       height: @view.height(),
       translateX: options.direction * @view.width()
     })
+
+    @applyProgress(@imageView)
+    @loading = true
     @imageView.load =>
+      @loading = false
       oldImageView.animate({
         translateX: -options.direction * @view.width()
       }, tools.merge(springOptions, {
@@ -135,6 +149,7 @@ class Fullscreen extends Controller
     window.removeEventListener('resize', @layout)
     window.removeEventListener('keydown', @onKeyDown)
     @hidden = true
+    @loading = false
 
     frame = @originalView.screenFrame()
     originalView = @originalView
@@ -187,6 +202,13 @@ class Fullscreen extends Controller
       @slide(o.image, o.options)
     else
       @bounce(1)
+
+  applyProgress: (imageView) =>
+    imageView.on 'progress', (progress) =>
+      if progress == 100
+        @loadingView.setValue(0)
+      else
+        @loadingView.setValue(progress / 100)
 
   # Events
   onClick: =>
