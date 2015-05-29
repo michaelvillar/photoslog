@@ -11,6 +11,7 @@ class ImageView extends View
     super
 
     @disabled = false
+    @willLoad = false
     @loaded = false
     @loadObject = null
     @bindEvents()
@@ -25,8 +26,13 @@ class ImageView extends View
     @el.addEventListener('click', @onClick)
 
   load: (done) =>
+    return if @willLoad or @loaded
+    @willLoad = true
     if @options.queue?
-      @options.queue.addJob(@loadJob)
+      @options.queue.addJob(@loadJob, {
+        cancelled: =>
+          @willLoad = false
+      })
     else
       @loadJob(done)
 

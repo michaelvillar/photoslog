@@ -134,11 +134,13 @@ class Timeline extends Controller
     if router.state?.type == 'group'
       @setSelectedGroupFromPath(router.state.obj, { animated: false })
     else
+      @photosGroupsView.loadImages()
       @updateVisibleGroups()
     @trigger('load')
 
   onScroll: =>
     requestAnimationFrame (t) =>
+      @photosGroupsView.loadImages()
       @updateVisibleGroups()
 
   onResize: =>

@@ -63,6 +63,25 @@ class PhotosGroupsView extends View
 
     return null
 
+  loadImages: =>
+    view = @anyVisibleGroup()
+    return unless view?
+
+    @queue.cancelAllJobs()
+    view.loadImages()
+
+    i = @subviews.indexOf(view)
+    k = 0
+    while true
+      k += 1
+      next = if i + k < @subviews.length then @subviews[i + k] else null
+      previous = if i - k >= 0 then @subviews[i - k] else null
+
+      next.loadImages() if next?
+      previous.loadImages() if previous?
+
+      break if !next? and !previous?
+
   visibleGroups: =>
     view = @anyVisibleGroup()
     return [] unless view?
@@ -72,14 +91,12 @@ class PhotosGroupsView extends View
 
     index = @subviews.indexOf(view)
     cachedVisibleBounds[index] = view.visibleBounds()
-    view.loadImages()
 
     addViews = (range, incr) =>
       k = 0
       cont = true
 
       checkView = (view) =>
-        view.loadImages()
         if cont
           visibleBounds = view.visibleBounds()
           if visibleBounds?

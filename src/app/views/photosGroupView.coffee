@@ -83,8 +83,6 @@ class PhotosGroupView extends View
     imageView
 
   loadImages: =>
-    return if @loaded
-    @loaded = true
     for i, image of @images
       image.view.load()
     @fullImage.view.load()
