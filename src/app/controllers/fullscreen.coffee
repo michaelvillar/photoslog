@@ -104,7 +104,8 @@ class Fullscreen extends Controller
       top: 0,
       width: @view.width(),
       height: @view.height(),
-      translateX: options.direction * @view.width()
+      translateX: options.direction * @view.width(),
+      transformOrigin: "0 0"
     })
 
     oldImageView.animate({
