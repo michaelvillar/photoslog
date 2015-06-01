@@ -1,5 +1,6 @@
 Controller = require('controller')
 View = require('view')
+LoadingView = require('loadingView')
 Timeline = require('timeline')
 Fullscreen = require('fullscreen')
 ForkView = require('forkView')
@@ -17,8 +18,12 @@ class App extends Controller
     @timeline = new Timeline
     @view.addSubview(@timeline.view)
 
+    @loadingView = new LoadingView
+    @view.addSubview(@loadingView)
+
     @fullscreen = new Fullscreen
     @fullscreen.delegate = @timeline
+    @fullscreen.on('progress', @onFullscreenLoadingProgress)
     @view.addSubview(@fullscreen.view)
 
     @forkView = new ForkView
@@ -62,5 +67,11 @@ class App extends Controller
 
   onLoad: =>
     @options.onLoad?()
+
+  onFullscreenLoadingProgress: (progress) =>
+    if progress == 100
+      @loadingView.setValue(0)
+    else
+      @loadingView.setValue(progress / 100)
 
 module.exports = App

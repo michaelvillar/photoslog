@@ -1,7 +1,6 @@
 Controller = require('controller')
 View = require('view')
 ImageView = require('imageView')
-LoadingView = require('loadingView')
 ratio = require('ratio')
 config = require('config')
 scroll = require('scroll')
@@ -28,9 +27,6 @@ class Fullscreen extends Controller
     @backgroundView = new View(className: 'backgroundView')
     @backgroundView.css(opacity: 0)
     @view.addSubview(@backgroundView)
-
-    @loadingView = new LoadingView
-    @view.addSubview(@loadingView)
 
     @imageView = null
     @originalView = null
@@ -67,7 +63,7 @@ class Fullscreen extends Controller
     @loading = true
     @imageView.load =>
       @loading = false
-      @loadingView.setValue(0)
+      @trigger('progress', 0)
       @view.addSubview(@imageView)
       @originalView.css(visibility: 'hidden')
       @view.css(visibility: 'visible')
@@ -205,10 +201,7 @@ class Fullscreen extends Controller
 
   applyProgress: (imageView) =>
     imageView.on 'progress', (progress) =>
-      if progress == 100
-        @loadingView.setValue(0)
-      else
-        @loadingView.setValue(progress / 100)
+      @trigger('progress', progress)
 
   # Events
   onClick: =>
