@@ -18,8 +18,10 @@ class App extends Controller
     @timeline = new Timeline
     @view.addSubview(@timeline.view)
 
+    loadingViewContainer = new View(className: 'loadingViewContainer')
+    @view.addSubview(loadingViewContainer)
     @loadingView = new LoadingView
-    @view.addSubview(@loadingView)
+    loadingViewContainer.addSubview(@loadingView)
 
     @fullscreen = new Fullscreen
     @fullscreen.delegate = @timeline

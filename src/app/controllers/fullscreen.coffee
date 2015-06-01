@@ -107,16 +107,17 @@ class Fullscreen extends Controller
       translateX: options.direction * @view.width()
     })
 
+    oldImageView.animate({
+      translateX: -options.direction * @view.width()
+    }, tools.merge(springOptions, {
+      complete: =>
+        oldImageView.removeFromSuperview()
+    }))
+
     @applyProgress(@imageView)
     @loading = true
     @imageView.load =>
       @loading = false
-      oldImageView.animate({
-        translateX: -options.direction * @view.width()
-      }, tools.merge(springOptions, {
-        complete: =>
-          oldImageView.removeFromSuperview()
-      }))
       @view.addSubview(imageView)
       options.view.css(visibility: 'hidden')
       imageView.animate({
