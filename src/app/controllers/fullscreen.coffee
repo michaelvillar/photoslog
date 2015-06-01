@@ -48,15 +48,15 @@ class Fullscreen extends Controller
     )
 
     @originalView = options.view
-    frame = @originalView.screenFrame()
-    @imageView.css(
-      left: frame.x,
-      top: frame.y,
-      width: frame.width,
-      height: frame.height,
-      scaleX: 1,
-      scaleY: 1
-    )
+
+    props = @scaleAndTranslate(@view, @originalView)
+    props.left = 0
+    props.top = 0
+    props.width = @view.width()
+    props.height = @view.height()
+    props.transformOrigin = "0 0"
+
+    @imageView.css(props)
 
     @applyProgress(@imageView)
 
@@ -76,10 +76,10 @@ class Fullscreen extends Controller
       })
 
       @imageView.animate({
-        left: 0,
-        top: 0,
-        width: @view.width(),
-        height: @view.height()
+        scaleX: 1,
+        scaleY: 1,
+        translateX: 0,
+        translateY: 0
       }, springOptions)
 
       window.addEventListener('resize', @layout)
@@ -147,8 +147,9 @@ class Fullscreen extends Controller
     @hidden = true
     @loading = false
 
-    frame = @originalView.screenFrame()
     originalView = @originalView
+
+    props = @scaleAndTranslate(@view, @originalView)
 
     body = new View(el: document.body)
     @imageView.el.classList.add('mainImageView')
@@ -158,12 +159,7 @@ class Fullscreen extends Controller
     })
 
     imageView = @imageView
-    @imageView.animate({
-      left: frame.x,
-      top: scroll.value.y + frame.y,
-      width: frame.width,
-      height: frame.height
-    }, tools.merge(springOptions, {
+    @imageView.animate(props, tools.merge(springOptions, {
       complete: =>
         if @hidden || originalView != @originalView
           originalView.css(visibility: 'visible')
@@ -202,6 +198,30 @@ class Fullscreen extends Controller
   applyProgress: (imageView) =>
     imageView.on 'progress', (progress) =>
       @trigger('progress', progress)
+
+  scaleAndTranslate: (viewA, viewB) =>
+    frame = viewB.screenFrame()
+
+    ratioOriginal = frame.width / frame.height
+    ratioView = viewA.width() / viewA.height()
+    scale = 0
+
+    translateX = frame.x
+    translateY = frame.y
+
+    if ratioOriginal > ratioView
+      scale = frame.width / viewA.width()
+      translateY += (frame.height / scale - viewA.height()) / 2 * scale
+    else
+      scale = frame.height / viewA.height()
+      translateX += (frame.width / scale - viewA.width()) / 2 * scale
+
+    {
+      translateX: translateX,
+      translateY: translateY,
+      scaleX: scale,
+      scaleY: scale,
+    }
 
   # Events
   onClick: =>
