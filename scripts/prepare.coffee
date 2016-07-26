@@ -101,7 +101,7 @@ createTimeline = (groups) ->
       for group in json.groups
         images = group.images
         group.images = []
-        for i in [0..Math.min(2, images.length - 1)]
+        for i in [0..(images.length - 1)]
           image = images[i]
           group.images.push(image)
           do (group, image) ->
@@ -163,7 +163,9 @@ resizeImage = (file, dstPath, opts = {}, others = {}) =>
           queue =>
             console.log "Resizing #{options.src} to #{options.dst}"
             return Q() if syncfs.existsSync(options.dst)
-            easyimage.resize(options)
+            easyimage.resize(options).catch((e) ->
+              console.log(e)
+            )
         ).then(->
           r = {}
           r["#{ratio}x"] = suffixedFilename
