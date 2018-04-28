@@ -1,21 +1,21 @@
 {
-  "name" : "PhotoLog",
-  "version" : "0.0.1",
-  "dependencies" : {
-    "coffee-script": "1.x.x",
-    "easyimage" : "1.x.x",
-    "connect" : "2.x.x",
-    "mincer" : "1.x.x",
-    "stylus": "0.x.x",
+  "name": "PhotoLog",
+  "version": "0.0.1",
+  "dependencies": {
+    "argv": "0.x.x",
+    "coffee-script": "^1.12.7",
+    "connect": "^2.30.2",
+    "easyimage": "1.x.x",
+    "express": "^4.16.3",
+    "express-handlebars": "^2.0.1",
+    "fs-watch-tree": "0.x.x",
+    "lodash": "2.x.x",
+    "mincer": "1.x.x",
+    "mkdirp": "x.x.x",
     "q": "1.x.x",
     "q-io": "1.x.x",
-    "express": "4.x.x",
-    "lodash": "2.x.x",
-    "express-handlebars": "2.x.x",
-    "mkdirp": "x.x.x",
-    "fs-watch-tree": "0.x.x",
-    "argv": "0.x.x",
-    "request": "x.x.x"
+    "request": "^2.85.0",
+    "stylus": "0.x.x"
   },
   "scripts": {
     "postinstall": "./scripts/compile.coffee"
