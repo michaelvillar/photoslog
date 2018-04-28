@@ -43,6 +43,7 @@ class TimelineView extends View
 
     window.addEventListener('resize', @onResize)
     window.addEventListener('load', =>
+      @onLoad()
       @updateCanvasSize()
       @center()
       @redraw()
@@ -227,6 +228,10 @@ class TimelineView extends View
     ctx.closePath()
 
   # Events
+  onLoad: =>
+    for view in @containerView.subviews
+      view.invalidateCachedFrame()
+
   onResize: =>
     @updateCanvasSize()
     @center()
